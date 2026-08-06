@@ -1,9 +1,311 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#6d28d9"><title>Silbenhelden</title><link rel="stylesheet" href="style.css"></head><body><main class="app"><header class="top"><div class="brand"><div class="logo">🧩</div><div><h1>Silbenhelden</h1><p>Lesen trainieren – Satz für Satz</p></div></div><div class="stats"><div class="pill">⭐ <span id="totalStars">0</span></div><div class="pill">⚡ <span id="totalXP">0</span> XP</div><div class="pill">🔥 <span id="bestStreak">0</span></div></div></header>
-<section id="home" class="screen"><div class="hero"><div class="mascot">🦉</div><h2>Werde zum Silbenhelden!</h2><p>Ordne die Silben, bilde richtige Sätze und sammle Sterne. Jede Runde enthält zehn zufällig ausgewählte Aufgaben.</p></div><div class="levels">
-<button class="level" data-level="leicht"><div class="icon">🌱</div><h3>Leicht</h3><p>Kurze, vertraute Sätze für die Grundschule.</p><strong>50 Sätze · Grundschule</strong><div class="levelprogress"><div id="prog-leicht"></div></div></button>
-<button class="level" data-level="mittel"><div class="icon">🚀</div><h3>Mittel</h3><p>Längere Sätze und anspruchsvollere Wörter.</p><strong>50 Sätze · Sekundarstufe</strong><div class="levelprogress"><div id="prog-mittel"></div></div></button>
-<button class="level" data-level="schwer"><div class="icon">🎓</div><h3>Schwer</h3><p>Komplexe Sprache und schulische Fachbegriffe.</p><strong>50 Sätze · Oberstufe</strong><div class="levelprogress"><div id="prog-schwer"></div></div></button>
-</div><p class="smallnote">Der Fortschritt wird nur auf diesem Gerät im Browser gespeichert.</p></section>
-<section id="game" class="screen hidden"><div class="gamehead"><div><h2 id="gameTitle">Leicht</h2><p id="roundText">Aufgabe 1 von 10</p></div><div><button class="btn soft" id="speak">🔊 Vorlesen</button> <button class="btn gray" id="homeBtn">⌂ Start</button></div></div><div class="roundbar"><div id="roundProgress"></div></div><div class="stars" id="roundStars">☆☆☆</div><div class="target" id="target"><div class="placeholder" id="placeholder">Silben hier ablegen</div></div><div class="label">Verfügbare Silben</div><div class="bank" id="bank"></div><div class="feedback" id="feedback"></div><div class="controls"><button class="btn soft" id="reset">Zurücksetzen</button><button class="btn primary" id="check">Satz prüfen</button><button class="btn gray" id="next" disabled>Weiter</button></div><p class="smallnote">Ziehen oder antippen: Beides funktioniert auf dem iPad.</p></section>
-<section id="result" class="screen result hidden"><div class="big">🏆</div><h2>Runde geschafft!</h2><p id="resultMessage"></p><div class="resultgrid"><div class="resultbox"><b id="earnedStars">0</b>Sterne</div><div class="resultbox"><b id="earnedXP">0</b>XP</div><div class="resultbox"><b id="accuracy">0%</b>Genauigkeit</div></div><div class="badges" id="badges"></div><button class="btn primary" id="again">Noch eine Runde</button> <button class="btn soft" id="resultHome">Zur Startseite</button></section><footer class="foot">Silbenhelden · Offline nutzbar · Optimiert für Touch und iPad</footer></main>
-<script src="data-leicht.js"></script><script src="data-mittel.js"></script><script src="data-schwer.js"></script><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#6d28d9">
+  <meta name="description" content="Silbenhelden – adaptives Lesetraining mit Lernpfaden, Wiederholungen und Fortschrittsanalyse.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Silbenhelden">
+  <title>Silbenhelden</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <button class="brand brand-button" id="brandHome" aria-label="Zur Startseite">
+        <span class="logo" aria-hidden="true">🧩</span>
+        <span>
+          <strong class="brand-title">Silbenhelden</strong>
+          <span class="brand-subtitle">Lesen trainieren – passend zu deinem Lernstand</span>
+        </span>
+      </button>
+
+      <nav class="main-nav" aria-label="Hauptnavigation">
+        <button class="nav-button active" data-screen="home">🏠 <span>Start</span></button>
+        <button class="nav-button" data-screen="dashboard">📊 <span>Fortschritt</span></button>
+        <button class="nav-button" data-screen="collection">🎒 <span>Sammlung</span></button>
+        <button class="nav-button" data-screen="teacher">👩‍🏫 <span>Lehrerbereich</span></button>
+      </nav>
+
+      <div class="stats" aria-label="Gesammelte Belohnungen">
+        <div class="pill" title="Sterne">⭐ <span id="totalStars">0</span></div>
+        <div class="pill" title="Kristalle">💎 <span id="totalCrystals">0</span></div>
+        <div class="pill" title="Erfahrungspunkte">⚡ <span id="totalXP">0</span></div>
+      </div>
+    </header>
+
+    <section id="home" class="screen">
+      <div class="hero hero-grid">
+        <div class="avatar-stage" aria-label="Dein Lernbegleiter">
+          <span class="avatar-accessory" id="homeAccessory"></span>
+          <span class="avatar" id="homeAvatar">🦉</span>
+        </div>
+        <div class="hero-copy">
+          <span class="eyebrow">Dein persönlicher Lesetrainer</span>
+          <h1>Heute ein Stück sicherer lesen</h1>
+          <p id="heroMessage">Die App wählt passende Aufgaben aus und merkt sich, welche Silben noch Übung brauchen.</p>
+          <div class="hero-actions">
+            <button class="btn primary large" id="adaptiveStart">✨ Intelligentes Training starten</button>
+            <button class="btn soft large" id="reviewStart">🔁 Wiederholen <span class="button-count" id="dueCount">0</span></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-grid">
+        <article class="panel mission-panel">
+          <div class="section-heading compact">
+            <div>
+              <span class="eyebrow">Diese Woche</span>
+              <h2>Wochenmissionen</h2>
+            </div>
+            <div class="week-badge" id="weekLabel"></div>
+          </div>
+          <div id="missionList" class="mission-list"></div>
+        </article>
+
+        <article class="panel quick-panel">
+          <div class="section-heading compact">
+            <div>
+              <span class="eyebrow">Aktueller Lernstand</span>
+              <h2>Deine Empfehlung</h2>
+            </div>
+          </div>
+          <div id="recommendation" class="recommendation"></div>
+        </article>
+      </div>
+
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">15 Lernpfade · 150 Sätze</span>
+          <h2>Wähle deinen Lernpfad</h2>
+          <p>Jeder Pfad enthält zehn thematisch passende Aufgaben. Bereits bekannte Sätze werden gezielt wiederholt.</p>
+        </div>
+      </div>
+      <div id="pathGroups" class="path-groups"></div>
+
+      <p class="privacy-note">🔒 Alle Lernstände und eigenen Inhalte bleiben ausschließlich auf diesem Gerät.</p>
+    </section>
+
+    <section id="game" class="screen hidden">
+      <div class="gamehead">
+        <div>
+          <div class="game-breadcrumb" id="gameBreadcrumb">Grundschule · Einfache Sätze</div>
+          <h2 id="gameTitle">Training</h2>
+          <p id="roundText">Aufgabe 1 von 10</p>
+        </div>
+        <div class="game-actions">
+          <button class="btn soft" id="speak">🔊 Vorlesen</button>
+          <button class="btn gray" id="gameHome">⌂ Beenden</button>
+        </div>
+      </div>
+
+      <div class="game-meta">
+        <div class="roundbar" aria-label="Rundenfortschritt"><div id="roundProgress"></div></div>
+        <div class="skill-chip" id="skillChip">Lernstufe 1,5</div>
+      </div>
+
+      <div class="stars" id="roundStars" aria-label="Mögliche Sterne">☆☆☆</div>
+      <div class="instruction" id="instruction">Setze den Satz aus den Silben zusammen.</div>
+
+      <div class="target" id="target" aria-label="Satzbereich">
+        <div class="placeholder" id="placeholder">Silben hier ablegen</div>
+      </div>
+
+      <div class="label-row">
+        <span>Verfügbare Silben</span>
+        <button class="text-button" id="shuffleTiles">Neu mischen</button>
+      </div>
+      <div class="bank" id="bank" aria-label="Silbenauswahl"></div>
+
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+      <div class="hint-card hidden" id="hintCard"></div>
+
+      <div class="controls">
+        <button class="btn soft" id="reset">Zurücksetzen</button>
+        <button class="btn primary" id="check">Satz prüfen</button>
+        <button class="btn gray" id="next" disabled>Weiter</button>
+      </div>
+      <p class="smallnote">Ziehen oder antippen funktioniert auf dem iPad. Nach Fehlern gibt die App schrittweise Hilfen.</p>
+    </section>
+
+    <section id="result" class="screen result hidden">
+      <div class="big" id="resultIcon">🏆</div>
+      <span class="eyebrow">Training beendet</span>
+      <h2 id="resultTitle">Runde geschafft!</h2>
+      <p id="resultMessage"></p>
+
+      <div class="resultgrid">
+        <div class="resultbox"><b id="earnedStars">0</b><span>Sterne</span></div>
+        <div class="resultbox"><b id="earnedXP">0</b><span>XP</span></div>
+        <div class="resultbox"><b id="accuracy">0%</b><span>Erster Versuch</span></div>
+        <div class="resultbox"><b id="sessionMinutes">0</b><span>Minuten</span></div>
+      </div>
+
+      <div class="result-analysis" id="resultAnalysis"></div>
+      <div class="badges" id="badges"></div>
+      <div class="result-actions">
+        <button class="btn primary" id="again">Noch eine Runde</button>
+        <button class="btn soft" id="resultDashboard">Fortschritt ansehen</button>
+        <button class="btn gray" id="resultHome">Zur Startseite</button>
+      </div>
+    </section>
+
+    <section id="dashboard" class="screen hidden">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Lernanalyse</span>
+          <h1>Dein Fortschritt</h1>
+          <p>Die Auswertung zeigt Lernerfolge und Bereiche, die noch regelmäßige Übung brauchen.</p>
+        </div>
+        <button class="btn soft" id="exportProgress">⬇ Lernstand exportieren</button>
+      </div>
+
+      <div class="metric-grid" id="metricGrid"></div>
+
+      <div class="dashboard-grid">
+        <article class="panel">
+          <div class="section-heading compact">
+            <div><span class="eyebrow">Letzte sieben Tage</span><h2>Trainingsaktivität</h2></div>
+          </div>
+          <div id="activityChart" class="activity-chart"></div>
+        </article>
+
+        <article class="panel">
+          <div class="section-heading compact">
+            <div><span class="eyebrow">Automatische Anpassung</span><h2>Lernstufen</h2></div>
+          </div>
+          <div id="skillBars" class="skill-bars"></div>
+        </article>
+
+        <article class="panel">
+          <div class="section-heading compact">
+            <div><span class="eyebrow">Fehleranalyse</span><h2>Silben mit Übungsbedarf</h2></div>
+          </div>
+          <div id="weakSyllables" class="weak-list"></div>
+        </article>
+
+        <article class="panel">
+          <div class="section-heading compact">
+            <div><span class="eyebrow">Wiederholsystem</span><h2>Nächste Wiederholungen</h2></div>
+          </div>
+          <div id="reviewOverview" class="review-overview"></div>
+        </article>
+      </div>
+
+      <article class="panel path-stat-panel">
+        <div class="section-heading compact">
+          <div><span class="eyebrow">Alle Lernpfade</span><h2>Pfadfortschritt</h2></div>
+        </div>
+        <div id="pathStats" class="path-stats"></div>
+      </article>
+    </section>
+
+    <section id="collection" class="screen hidden">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Belohnungen</span>
+          <h1>Deine Sammlung</h1>
+          <p>Wähle einen Lernbegleiter und schalte durch regelmäßiges Training neue Accessoires frei.</p>
+        </div>
+      </div>
+
+      <div class="collection-grid">
+        <article class="panel avatar-panel">
+          <div class="avatar-stage large" aria-label="Ausgewählter Lernbegleiter">
+            <span class="avatar-accessory" id="collectionAccessory"></span>
+            <span class="avatar" id="collectionAvatar">🦉</span>
+          </div>
+          <h2>Dein Lernbegleiter</h2>
+          <div id="avatarChoices" class="choice-grid"></div>
+          <h3>Accessoire</h3>
+          <div id="accessoryChoices" class="choice-grid accessories"></div>
+        </article>
+
+        <article class="panel reward-panel">
+          <div class="reward-summary" id="rewardSummary"></div>
+          <h2>Abzeichen und Pokale</h2>
+          <div id="rewardCabinet" class="reward-cabinet"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="teacher" class="screen hidden">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Ohne Anmeldung</span>
+          <h1>Lehrer- und Elternbereich</h1>
+          <p>Erstelle einen direkten Trainingslink oder speichere eigene silbierte Sätze auf diesem Gerät.</p>
+        </div>
+      </div>
+
+      <div class="teacher-grid">
+        <article class="panel">
+          <h2>📱 Trainingsauftrag per QR-Code</h2>
+          <p class="panel-copy">Der QR-Code öffnet direkt den ausgewählten Lernpfad. Es werden keine Schülerdaten übertragen.</p>
+          <div class="form-grid">
+            <label>Schulstufe
+              <select id="shareLevel">
+                <option value="leicht">Grundschule</option>
+                <option value="mittel">Sekundarstufe</option>
+                <option value="schwer">Oberstufe</option>
+              </select>
+            </label>
+            <label>Lernpfad
+              <select id="sharePath"></select>
+            </label>
+            <label>Aufgaben
+              <select id="shareCount">
+                <option value="5">5 Aufgaben</option>
+                <option value="10" selected>10 Aufgaben</option>
+              </select>
+            </label>
+            <label>Auftragscode
+              <input id="shareSeed" maxlength="30" value="Lesetraining" autocomplete="off">
+            </label>
+          </div>
+          <button class="btn primary full" id="generateShare">QR-Code erstellen</button>
+          <div id="shareOutput" class="share-output hidden">
+            <canvas id="qrCanvas" width="260" height="260" aria-label="QR-Code"></canvas>
+            <div class="share-link-row">
+              <input id="shareLink" readonly>
+              <button class="btn soft" id="copyShare">Kopieren</button>
+            </div>
+            <p id="qrFallback" class="smallnote hidden">Der QR-Code konnte nicht geladen werden. Der Link funktioniert trotzdem.</p>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h2>✍️ Eigene Übungen</h2>
+          <p class="panel-copy">Trenne mehrsilbige Wörter mit Bindestrichen. Jede Zeile wird zu einer Aufgabe.</p>
+          <label>Name des Übungspakets
+            <input id="customName" placeholder="Zum Beispiel: Feuerwehr">
+          </label>
+          <label>Silbierte Sätze
+            <textarea id="customText" rows="10" placeholder="Die Feu-er-wehr löscht den Brand.&#10;Das gro-ße Fahr-zeug fährt sehr schnell."></textarea>
+          </label>
+          <div class="form-actions">
+            <button class="btn primary" id="saveCustom">Übungspaket speichern</button>
+            <button class="btn soft" id="importCustom">JSON importieren</button>
+            <input type="file" id="customFile" accept="application/json" hidden>
+          </div>
+          <div id="customFeedback" class="inline-feedback" aria-live="polite"></div>
+          <div id="customSets" class="custom-sets"></div>
+        </article>
+      </div>
+    </section>
+
+    <footer class="foot">Silbenhelden · Installierbare Offline-Web-App · Fortschritt bleibt lokal auf dem Gerät</footer>
+  </main>
+
+  <script src="data-leicht.js"></script>
+  <script src="data-mittel.js"></script>
+  <script src="data-schwer.js"></script>
+  <script async src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
