@@ -1,0 +1,20 @@
+{
+  "name": "Silbenhelden – Lesetraining",
+  "short_name": "Silbenhelden",
+  "description": "Adaptives Silbentraining mit Lernpfaden, Wiederholungen und lokaler Fortschrittsanalyse.",
+  "lang": "de-DE",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f3ff",
+  "theme_color": "#6d28d9",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
