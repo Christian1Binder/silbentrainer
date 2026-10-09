@@ -192,11 +192,11 @@ const SETS = {
   ]
 };
 const TITLES={leicht:"Einfach",mittel:"Normal",schwer:"Knifflig"};
-let level="leicht",round=0,queue=[],answers=[],selected=-1,checked=false,totalCorrect=0,firstTry=0,feedbackText="",feedbackKind="";
+let level="leicht",round=0,queue=[],answers=[],selected=-1,checked=false,roundCheckedOnce=false,totalCorrect=0,firstTry=0,feedbackText="",feedbackKind="";
 const $=id=>document.getElementById(id);
 function parse(raw){return raw.trim().split(/\s+/).filter(Boolean).map(piece=>{const cut=piece.lastIndexOf("|");return {text:piece.slice(0,cut),type:piece.slice(cut+1).replace(/[.,!?;:]+$/u,""),punct:piece.slice(cut).replace(/^[^|]*\|[^.,!?;:]*/u,"")};});}
 function show(view){$("home").classList.toggle("hidden",view!=="home");$("lesson").classList.toggle("hidden",view!=="lesson");$("finish").classList.toggle("hidden",view!=="finish");window.scrollTo({top:0,behavior:"smooth"});}
-function start(which){level=which;round=0;queue=[...SETS[level]];answers=Array(parse(queue[0]).length).fill("");selected=-1;checked=false;totalCorrect=0;firstTry=0;feedbackText="";feedbackKind="";$("levelName").textContent=TITLES[level];show("lesson");render();}
+function start(which){level=which;round=0;queue=[...SETS[level]];answers=Array(parse(queue[0]).length).fill("");selected=-1;checked=false;roundCheckedOnce=false;totalCorrect=0;firstTry=0;feedbackText="";feedbackKind="";$("levelName").textContent=TITLES[level];show("lesson");render();}
 function render(){
   const words=parse(queue[round]);
   $("taskCount").textContent=`Satz ${round+1} von ${queue.length}`;
@@ -219,12 +219,12 @@ function render(){
 }
 function assign(type){if(selected<0)return;answers[selected]=type;selected=-1;render();}
 function check(){
-  const words=parse(queue[round]);const misses=words.filter((w,i)=>answers[i]!==w.type).length;checked=true;
-  if(misses===0){totalCorrect+=words.length;firstTry+=1;feedbackText="Alles richtig! Du hast jedem Wort die passende Wortart zugeordnet.";feedbackKind="success";}
+  const words=parse(queue[round]);const firstAttempt=!roundCheckedOnce;roundCheckedOnce=true;const misses=words.filter((w,i)=>answers[i]!==w.type).length;checked=true;
+  if(misses===0){totalCorrect+=words.length;if(firstAttempt)firstTry+=1;feedbackText="Alles richtig! Du hast jedem Wort die passende Wortart zugeordnet.";feedbackKind="success";}
   else{feedbackText=`Schon ${words.length-misses} von ${words.length} richtig. Falsche Wörter sind markiert. Tippe ein rot markiertes Wort an, ändere die Zuordnung und prüfe erneut.`;feedbackKind="retry";}
   render();if(misses===0){$("next").focus({preventScroll:true});}
 }
-function advance(){round+=1;if(round>=queue.length){$("finishMessage").textContent=`Du hast ${queue.length} Sätze auf der Stufe „${TITLES[level]}“ bearbeitet und ${totalCorrect} Wörter korrekt zugeordnet. ${firstTry===queue.length?"Jeder Satz war gleich beim ersten Prüfen richtig!":`Beim ersten Prüfen waren ${firstTry} Sätze schon vollständig richtig.`}`;$("progressBar").style.width="100%";show("finish");return;}answers=Array(parse(queue[round]).length).fill("");selected=-1;checked=false;feedbackText="";feedbackKind="";$("check").textContent="Antwort prüfen";render();$("sentence").scrollIntoView({behavior:"smooth",block:"center"});}
+function advance(){round+=1;if(round>=queue.length){$("finishMessage").textContent=`Du hast ${queue.length} Sätze auf der Stufe „${TITLES[level]}“ bearbeitet und ${totalCorrect} Wörter korrekt zugeordnet. ${firstTry===queue.length?"Jeder Satz war gleich beim ersten Prüfen richtig!":`Beim ersten Prüfen waren ${firstTry} Sätze schon vollständig richtig.`}`;$("progressBar").style.width="100%";show("finish");return;}answers=Array(parse(queue[round]).length).fill("");selected=-1;checked=false;roundCheckedOnce=false;feedbackText="";feedbackKind="";$("check").textContent="Antwort prüfen";render();$("sentence").scrollIntoView({behavior:"smooth",block:"center"});}
 $("wordTypes").addEventListener("click",e=>{const btn=e.target.closest(".type-button");if(btn)assign(btn.childNodes[0].textContent.trim());});
 document.querySelectorAll(".level-card").forEach(b=>b.addEventListener("click",()=>start(b.dataset.level)));
 $("check").addEventListener("click",check);
