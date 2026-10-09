@@ -194,7 +194,7 @@ const SETS = {
 const TITLES={leicht:"Einfach",mittel:"Normal",schwer:"Knifflig"};
 let level="leicht",round=0,queue=[],answers=[],selected=-1,checked=false,roundCheckedOnce=false,totalCorrect=0,firstTry=0,feedbackText="",feedbackKind="";
 const $=id=>document.getElementById(id);
-function parse(raw){return raw.trim().split(/\s+/).filter(Boolean).map(piece=>{const cut=piece.lastIndexOf("|");return {text:piece.slice(0,cut),type:piece.slice(cut+1).replace(/[.,!?;:]+$/u,""),punct:piece.slice(cut).replace(/^[^|]*\|[^.,!?;:]*/u,"")};});}
+function parse(raw){return raw.trim().split(/\s+/).filter(Boolean).map(piece=>{if(piece.endsWith("|"))piece=piece.slice(0,-1);const match=piece.match(/^(.+)\|([^|.,!?;:]+)([.,!?;:]*)$/u);if(!match)throw new Error("Ungültige Aufgabenangabe: "+piece);return {text:match[1],type:match[2],punct:match[3]};});}
 function show(view){$("home").classList.toggle("hidden",view!=="home");$("lesson").classList.toggle("hidden",view!=="lesson");$("finish").classList.toggle("hidden",view!=="finish");window.scrollTo({top:0,behavior:"smooth"});}
 function start(which){level=which;round=0;queue=[...SETS[level]];answers=Array(parse(queue[0]).length).fill("");selected=-1;checked=false;roundCheckedOnce=false;totalCorrect=0;firstTry=0;feedbackText="";feedbackKind="";$("levelName").textContent=TITLES[level];show("lesson");render();}
 function render(){
