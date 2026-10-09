@@ -1,10 +1,13 @@
 # Silbenhelden
 
+Silbenhelden enthält zusätzlich ein Wortarten-Training mit je 15 Sätzen in den Stufen **Einfach**, **Normal** und **Knifflig**. Wörter werden auf dem Bildschirm angetippt und einer Wortart zugeordnet; Rückmeldung und Korrekturmöglichkeit sind für Smartphone und Tablet ausgelegt.
+
 Silbenhelden ist eine kostenlose, iPad-optimierte Web-App zum Trainieren des Lesens mit Silben. Die App läuft vollständig im Browser und speichert Lernstände ausschließlich lokal auf dem verwendeten Gerät.
 
 ## Funktionen
 
 - 150 vorbereitete Sätze in drei Schulstufen
+- Wortarten-Training mit 45 Sätzen in drei ansteigenden Schwierigkeitsstufen
 - 15 Lernpfade mit jeweils zehn Aufgaben
 - adaptiver Trainer, der die Schwierigkeit an den Lernstand anpasst
 - Wiederholsystem mit Intervallen von 1, 3, 7, 14, 30 und 60 Tagen
