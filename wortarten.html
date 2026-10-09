@@ -80,7 +80,7 @@
         <p>Tippe ein Wort im Satz an und ordne ihm eine Wortart zu. Du kannst Wörter jederzeit verbessern. Erst wenn alles stimmt, geht es zum nächsten Satz.</p>
       </div>
       <div class="level-grid" aria-label="Schwierigkeit auswählen">
-        <button class="level-card" data-level="leicht"><span class="level-emoji">🌱</span><strong>Einfach</strong><span>Kurze, klare Sätze. Nomen, Verben, Adjektive und Artikel üben.</span></button>
+        <button class="level-card" data-level="leicht"><span class="level-emoji">🌱</span><strong>Einfach</strong><span>Kurze, klare Sätze. Nomen, Verben, Adjektive, Artikel und erste Adverbien üben.</span></button>
         <button class="level-card" data-level="mittel"><span class="level-emoji">🚀</span><strong>Normal</strong><span>Längere Sätze mit Pronomen, Präpositionen, Adverbien und Bindewörtern.</span></button>
         <button class="level-card" data-level="schwer"><span class="level-emoji">🧩</span><strong>Knifflig</strong><span>Verschachtelte Sätze, Wortarten im Zusammenhang und knifflige Fälle.</span></button>
       </div>
@@ -157,11 +157,11 @@ const SETS = {
     "Ein|Artikel müder|Adjektiv Bär|Nomen schläft|Verb lange|Adjektiv."
   ],
   mittel: [
-    "Heute|Adverb fährt|Verb meine|Artikel Freundin|Nomen mit|Präposition dem|Artikel Bus|Nomen zur|Präposition Schule|Nomen.|",
+    "Heute|Adverb fährt|Verb meine|Pronomen Freundin|Nomen mit|Präposition dem|Artikel Bus|Nomen in|Präposition die|Artikel Schule|Nomen.|",
     "Wir|Pronomen warten|Verb geduldig|Adjektiv vor|Präposition dem|Artikel Kino|Nomen.|",
     "Der|Artikel flinke|Adjektiv Läufer|Nomen gewinnt|Verb das|Artikel Rennen|Nomen, weil|Konjunktion er|Pronomen regelmäßig|Adverb trainiert|Verb.|",
     "Nach|Präposition dem|Artikel Essen|Nomen räumt|Verb Paul|Nomen die|Artikel Teller|Nomen vorsichtig|Adverb ab|Verb.|",
-    "Sie|Pronomen besucht|Verb morgen|Adverb ihre|Artikel nette|Adjektiv Tante|Nomen.|",
+    "Sie|Pronomen besucht|Verb morgen|Adverb ihre|Pronomen nette|Adjektiv Tante|Nomen.|",
     "Der|Artikel Hund|Nomen versteckt|Verb sich|Pronomen unter|Präposition dem|Artikel Tisch|Nomen.|",
     "Obwohl|Konjunktion es|Pronomen regnet|Verb, spielen|Verb die|Artikel Kinder|Nomen draußen|Adverb.|",
     "Drei|Zahlwort Schüler|Nomen lösen|Verb gemeinsam|Adverb die|Artikel schwierige|Adjektiv Aufgabe|Nomen.|",
@@ -179,31 +179,55 @@ const SETS = {
     "Wegen|Präposition des|Artikel dichten|Adjektiv Nebels|Nomen konnte|Verb das|Artikel Schiff|Nomen nur|Adverb langsam|Adverb fahren|Verb.|",
     "Der|Artikel Vorschlag|Nomen klingt|Verb zunächst|Adverb ungewöhnlich|Adjektiv, obwohl|Konjunktion er|Pronomen sehr|Adverb sinnvoll|Adjektiv ist|Verb.|",
     "Wer|Pronomen aufmerksam|Adjektiv zuhört|Verb, versteht|Verb später|Adverb auch|Adverb schwierige|Adjektiv Erklärungen|Nomen.|",
-    "Während|Konjunktion die|Artikel anderen|Pronomen warteten|Verb, bereitete|Verb Mila|Nomen bereits|Adverb alles|Pronomen für|Präposition den|Artikel Versuch|Nomen vor|Verb.|",
+    "Während|Konjunktion andere|Pronomen warteten|Verb, bereitete|Verb Mila|Nomen bereits|Adverb alles|Pronomen für|Präposition den|Artikel Versuch|Nomen vor|Verb.|",
     "Das|Artikel schnelle|Adjektiv Laufen|Nomen fällt|Verb ihm|Pronomen heute|Adverb leichter|Adjektiv als|Konjunktion gestern|Adverb.|",
-    "Oh|Ausrufewort, das|Artikel hast|Verb du|Pronomen aber|Adverb gut|Adjektiv gemacht|Verb!|",
+    "Oh|Ausrufewort, das|Pronomen hast|Verb du|Pronomen aber|Adverb gut|Adverb gemacht|Verb!",
     "Viele|Zahlwort glauben|Verb, dass|Konjunktion jedes|Pronomen alte|Adjektiv Gebäude|Nomen geschützt|Adjektiv werden|Verb muss|Verb.|",
     "Der|Artikel Plan|Nomen, den|Pronomen wir|Pronomen gemeinsam|Adverb entworfen|Verb haben|Verb, funktioniert|Verb überraschend|Adverb gut|Adjektiv.|",
-    "Trotz|Präposition seiner|Artikel großen|Adjektiv Sorge|Nomen blieb|Verb der|Artikel Junge|Nomen erstaunlich|Adverb ruhig|Adjektiv.|",
+    "Trotz|Präposition seiner|Pronomen großen|Adjektiv Sorge|Nomen blieb|Verb der|Artikel Junge|Nomen erstaunlich|Adverb ruhig|Adjektiv.|",
     "Sie|Pronomen fragte|Verb, ob|Konjunktion jemand|Pronomen die|Artikel verlorene|Adjektiv Tasche|Nomen gesehen|Verb habe|Verb.|",
-    "Erst|Adverb nachdem|Konjunktion der|Artikel Regen|Nomen aufgehört|Verb hatte|Verb, gingen|Verb wir|Pronomen wieder|Adverb hinaus|Verb.|",
+    "Erst|Adverb nachdem|Konjunktion der|Artikel Regen|Nomen aufgehört|Verb hatte|Verb, gingen|Verb wir|Pronomen wieder|Adverb hinaus|Adverb.|",
     "Das|Artikel schwer|Adjektiv zu|Präposition erklärende|Adjektiv Ergebnis|Nomen überzeugte|Verb dennoch|Adverb alle|Pronomen.|",
     "Einige|Zahlwort liefen|Verb voraus|Adverb, während|Konjunktion die|Artikel übrigen|Adjektiv langsam|Adverb folgten|Verb.|"
   ]
 };
 const TITLES={leicht:"Einfach",mittel:"Normal",schwer:"Knifflig"};
-let level="leicht",round=0,queue=[],answers=[],selected=-1,checked=false,totalCorrect=0,firstTry=0;
+let level="leicht",round=0,queue=[],answers=[],selected=-1,checked=false,totalCorrect=0,firstTry=0,feedbackText="",feedbackKind="";
 const $=id=>document.getElementById(id);
 function parse(raw){return raw.trim().split(/\s+/).filter(Boolean).map(piece=>{const cut=piece.lastIndexOf("|");return {text:piece.slice(0,cut),type:piece.slice(cut+1).replace(/[.,!?;:]+$/u,""),punct:piece.slice(cut).replace(/^[^|]*\|[^.,!?;:]*/u,"")};});}
 function show(view){$("home").classList.toggle("hidden",view!=="home");$("lesson").classList.toggle("hidden",view!=="lesson");$("finish").classList.toggle("hidden",view!=="finish");window.scrollTo({top:0,behavior:"smooth"});}
-function start(which){level=which;round=0;queue=[...SETS[level]];answers=Array(parse(queue[0]).length).fill("");selected=-1;checked=false;totalCorrect=0;firstTry=0;$("levelName").textContent=TITLES[level];show("lesson");render();}
-function render(){const words=parse(queue[round]);$("taskCount").textContent=`Satz ${round+1} von ${queue.length}`;$("progressBar").style.width=`${round/queue.length*100}%`;const area=$("sentence");area.replaceChildren();words.forEach((w,i)=>{const b=document.createElement("button");b.type="button";b.className="word";b.textContent=w.text;b.setAttribute("aria-label",`${w.text}, Wort ${i+1}${answers[i]?`, zugeordnet: ${answers[i]}`:""}`);if(i===selected)b.classList.add("selected");if(checked){if(answers[i]===w.type)b.classList.add("correct");else b.classList.add("wrong");const tag=document.createElement("span");tag.className="answer-tag";tag.textContent=w.type;b.append(tag);}b.addEventListener("click",()=>{if(checked)return;selected=i;render();});area.append(b);if(w.punct){const punctuation=document.createElement("span");punctuation.textContent=w.punct;area.append(punctuation);}});const palette=$("wordTypes");palette.replaceChildren();TYPES.forEach(type=>{const b=document.createElement("button");b.className="type-button";b.type="button";b.innerHTML=`${type}<small>${TYPE_HINTS[type]}</small>`;b.disabled=selected<0||checked;b.addEventListener("click",()=>assign(type));palette.append(b);});$("selectedNote").textContent=selected<0?"Wähle ein Wort im Satz aus.":`Ausgewählt: „${words[selected].text}“ · jetzt die Wortart antippen.`;$("check").classList.toggle("hidden",checked);$("check").disabled=answers.some(a=>!a);$("next").classList.toggle("hidden",!checked);$("feedback").textContent="";$("feedback").className="task-feedback";}
+function start(which){level=which;round=0;queue=[...SETS[level]];answers=Array(parse(queue[0]).length).fill("");selected=-1;checked=false;totalCorrect=0;firstTry=0;feedbackText="";feedbackKind="";$("levelName").textContent=TITLES[level];show("lesson");render();}
+function render(){
+  const words=parse(queue[round]);
+  $("taskCount").textContent=`Satz ${round+1} von ${queue.length}`;
+  $("progressBar").style.width=`${round/queue.length*100}%`;
+  const area=$("sentence");area.replaceChildren();
+  words.forEach((w,i)=>{
+    const b=document.createElement("button");b.type="button";b.className="word";b.textContent=w.text;
+    b.setAttribute("aria-label",`${w.text}, Wort ${i+1}${answers[i]?`, zugeordnet: ${answers[i]}`:""}`);
+    if(i===selected)b.classList.add("selected");
+    if(checked){if(answers[i]===w.type)b.classList.add("correct");else b.classList.add("wrong");const tag=document.createElement("span");tag.className="answer-tag";tag.textContent=answers[i]||"noch offen";b.append(tag);}
+    b.addEventListener("click",()=>{if(checked&&answers[i]===w.type)return;selected=i;render();});
+    area.append(b);if(w.punct){const p=document.createElement("span");p.textContent=w.punct;area.append(p);}
+  });
+  const palette=$("wordTypes");palette.replaceChildren();
+  TYPES.forEach(type=>{const b=document.createElement("button");b.className="type-button";b.type="button";b.innerHTML=`${type}<small>${TYPE_HINTS[type]}</small>`;b.disabled=selected<0||(checked&&answers[selected]===words[selected].type);b.addEventListener("click",()=>assign(type));palette.append(b);});
+  $("selectedNote").textContent=selected<0?"Wähle ein Wort im Satz aus.":`Ausgewählt: „${words[selected].text}“ · jetzt die Wortart antippen.`;
+  $("check").classList.remove("hidden");$("check").disabled=answers.some(a=>!a);$("check").textContent=checked?"Erneut prüfen":"Antwort prüfen";
+  const allCorrect=checked&&words.every((w,i)=>answers[i]===w.type);$("next").classList.toggle("hidden",!allCorrect);
+  $("feedback").textContent=feedbackText;$("feedback").className="task-feedback"+(feedbackKind?` ${feedbackKind}`:"");
+}
 function assign(type){if(selected<0)return;answers[selected]=type;selected=-1;render();}
-function check(){const words=parse(queue[round]);const misses=words.filter((w,i)=>answers[i]!==w.type).length;checked=true;if(misses===0){totalCorrect+=words.length;firstTry+=1;$("feedback").textContent="Alles richtig! Du hast jedem Wort die passende Wortart zugeordnet.";$("feedback").classList.add("success");}else{$("feedback").textContent=`Schon ${words.length-misses} von ${words.length} richtig. Die falschen Wörter sind markiert. Tippe auf „Korrigieren“, ändere sie und prüfe erneut.`;$("feedback").classList.add("retry");}render();if(misses>0){$("next").classList.add("hidden");$("check").classList.remove("hidden");$("check").textContent="Korrigieren";$("check").disabled=true;words.forEach((w,i)=>{if(answers[i]!==w.type){const b=$("sentence").children;const wordButton=[...b].filter(x=>x.classList?.contains("word"))[i];if(wordButton)wordButton.addEventListener("click",()=>{checked=false;selected=i;render();});}});}else{$("next").classList.remove("hidden");$("next").focus({preventScroll:true});}}
-function advance(){round+=1;if(round>=queue.length){$("finishMessage").textContent=`Du hast ${queue.length} Sätze auf der Stufe „${TITLES[level]}“ bearbeitet und ${totalCorrect} Wörter korrekt zugeordnet. ${firstTry===queue.length?"Jeder Satz war gleich beim ersten Prüfen richtig!":`Beim ersten Prüfen waren ${firstTry} Sätze schon vollständig richtig.`}`;$("progressBar").style.width="100%";show("finish");return;}answers=Array(parse(queue[round]).length).fill("");selected=-1;checked=false;$("check").textContent="Antwort prüfen";render();$("sentence").scrollIntoView({behavior:"smooth",block:"center"});}
+function check(){
+  const words=parse(queue[round]);const misses=words.filter((w,i)=>answers[i]!==w.type).length;checked=true;
+  if(misses===0){totalCorrect+=words.length;firstTry+=1;feedbackText="Alles richtig! Du hast jedem Wort die passende Wortart zugeordnet.";feedbackKind="success";}
+  else{feedbackText=`Schon ${words.length-misses} von ${words.length} richtig. Falsche Wörter sind markiert. Tippe ein rot markiertes Wort an, ändere die Zuordnung und prüfe erneut.`;feedbackKind="retry";}
+  render();if(misses===0){$("next").focus({preventScroll:true});}
+}
+function advance(){round+=1;if(round>=queue.length){$("finishMessage").textContent=`Du hast ${queue.length} Sätze auf der Stufe „${TITLES[level]}“ bearbeitet und ${totalCorrect} Wörter korrekt zugeordnet. ${firstTry===queue.length?"Jeder Satz war gleich beim ersten Prüfen richtig!":`Beim ersten Prüfen waren ${firstTry} Sätze schon vollständig richtig.`}`;$("progressBar").style.width="100%";show("finish");return;}answers=Array(parse(queue[round]).length).fill("");selected=-1;checked=false;feedbackText="";feedbackKind="";$("check").textContent="Antwort prüfen";render();$("sentence").scrollIntoView({behavior:"smooth",block:"center"});}
 $("wordTypes").addEventListener("click",e=>{const btn=e.target.closest(".type-button");if(btn)assign(btn.childNodes[0].textContent.trim());});
 document.querySelectorAll(".level-card").forEach(b=>b.addEventListener("click",()=>start(b.dataset.level)));
-$("check").addEventListener("click",()=>{if(checked){checked=false;render();return;}check();});
+$("check").addEventListener("click",check);
 $("next").addEventListener("click",advance);
 $("quit").addEventListener("click",()=>show("home"));
 $("choose").addEventListener("click",()=>show("home"));
