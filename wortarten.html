@@ -214,7 +214,8 @@ const TITLES={leicht:"Grundschule",mittel:"Realschule",schwer:"Ab Klasse 10 / Gy
 const BONUS_TASKS={leicht:{12:{label:"✨ Sonderaufgabe · 2× Punkte",multiplier:2},13:{label:"✨ Sonderaufgabe · 2× Punkte",multiplier:2},14:{label:"🔥 Extra knifflig · 3× Punkte",multiplier:3}}};
 let level="leicht",round=0,queue=[],answers=[],selected=-1,activeType="",checked=false,roundCheckedOnce=false,totalCorrect=0,firstTry=0,score=0,feedbackText="",feedbackKind="";
 const $=id=>document.getElementById(id);
-function taskInfo(){return BONUS_TASKS[level]?.[round]||null;}\nfunction parse(raw){return raw.trim().split(/\s+/).filter(Boolean).map(piece=>{if(piece.endsWith("|"))piece=piece.slice(0,-1);const match=piece.match(/^(.+)\|([^|.,!?;:]+)([.,!?;:]*)$/u);if(!match)throw new Error("Ungültige Aufgabenangabe: "+piece);return {text:match[1],type:match[2],punct:match[3]};});}
+function taskInfo(){return BONUS_TASKS[level]?.[round]||null;}
+function parse(raw){return raw.trim().split(/\s+/).filter(Boolean).map(piece=>{if(piece.endsWith("|"))piece=piece.slice(0,-1);const match=piece.match(/^(.+)\|([^|.,!?;:]+)([.,!?;:]*)$/u);if(!match)throw new Error("Ungültige Aufgabenangabe: "+piece);return {text:match[1],type:match[2],punct:match[3]};});}
 function show(view){$("home").classList.toggle("hidden",view!=="home");$("lesson").classList.toggle("hidden",view!=="lesson");$("finish").classList.toggle("hidden",view!=="finish");window.scrollTo({top:0,behavior:"smooth"});}
 function start(which){level=which;round=0;queue=[...SETS[level]];answers=Array(parse(queue[0]).length).fill("");selected=-1;activeType="";checked=false;roundCheckedOnce=false;totalCorrect=0;firstTry=0;score=0;feedbackText="";feedbackKind="";$("levelName").textContent=TITLES[level];show("lesson");render();}
 function render(){
