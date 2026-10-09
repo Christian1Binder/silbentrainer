@@ -30,13 +30,24 @@
     .progress-track span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#7c3aed,#ec4899);transition:width .2s}
     .prompt{margin:0 0 8px;color:var(--muted);font-weight:700}
     .sentence{min-height:100px;padding:18px 14px;border:2px solid var(--line);border-radius:20px;background:#faf9ff;font-size:clamp(1.3rem,4.5vw,2rem);line-height:2.1}
-    .word{display:inline-block;margin:0 .13em .12em 0;padding:3px 8px;border:2px solid transparent;border-radius:11px;color:var(--ink);background:white;box-shadow:0 3px 10px rgba(31,41,55,.08);font-weight:800;cursor:pointer;touch-action:manipulation}
+    .word{display:inline-block;margin:0 .13em .12em 0;padding:3px 8px;border:2px solid var(--cat-border,transparent);border-radius:11px;color:var(--cat-ink,var(--ink));background:var(--cat-bg,#fff);box-shadow:0 3px 10px rgba(31,41,55,.08);font-weight:800;cursor:pointer;touch-action:manipulation}
     .word.selected{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.15)}
     .word.correct{border-color:#86efac;background:#dcfce7}
     .word.wrong{border-color:#fca5a5;background:#fee2e2}
-    .word .answer-tag{display:block;margin-top:1px;font-size:.58em;line-height:1.05;color:#5b21b6}
+    .word .answer-tag{display:block;margin-top:2px;font-size:.58em;line-height:1.05;color:var(--cat-ink,#5b21b6)}
+    /* Jede Wortart erhält eine zurückhaltende, wiedererkennbare Farbe. */
+    .word[data-type="Nomen"],.type-button[data-type="Nomen"]{--cat-bg:#eef2ff;--cat-ink:#3730a3;--cat-border:#c7d2fe}
+    .word[data-type="Verb"],.type-button[data-type="Verb"]{--cat-bg:#e8f5f2;--cat-ink:#176356;--cat-border:#b7e4d9}
+    .word[data-type="Adjektiv"],.type-button[data-type="Adjektiv"]{--cat-bg:#fff6df;--cat-ink:#805b14;--cat-border:#f2dda2}
+    .word[data-type="Artikel"],.type-button[data-type="Artikel"]{--cat-bg:#f1f2f5;--cat-ink:#505866;--cat-border:#d7dbe2}
+    .word[data-type="Pronomen"],.type-button[data-type="Pronomen"]{--cat-bg:#eaf3ff;--cat-ink:#245b96;--cat-border:#c3daf8}
+    .word[data-type="Präposition"],.type-button[data-type="Präposition"]{--cat-bg:#fff0f2;--cat-ink:#91465a;--cat-border:#f3cbd4}
+    .word[data-type="Adverb"],.type-button[data-type="Adverb"]{--cat-bg:#eaf7fb;--cat-ink:#286276;--cat-border:#c2e5ee}
+    .word[data-type="Konjunktion"],.type-button[data-type="Konjunktion"]{--cat-bg:#f4edfb;--cat-ink:#674389;--cat-border:#dfcdef}
+    .word[data-type="Zahlwort"],.type-button[data-type="Zahlwort"]{--cat-bg:#edf7e9;--cat-ink:#426c35;--cat-border:#cfe4c4}
+    .word[data-type="Ausrufewort"],.type-button[data-type="Ausrufewort"]{--cat-bg:#fff0e8;--cat-ink:#98532d;--cat-border:#f4d0bb}
     .word-types{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:16px 0}
-    .type-button{min-height:48px;padding:8px 6px;border:1px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);font-weight:800;cursor:pointer;touch-action:manipulation}
+    .type-button{min-height:48px;padding:8px 6px;border:1px solid var(--cat-border,var(--line));border-radius:13px;background:var(--cat-bg,#fff);color:var(--cat-ink,var(--ink));font-weight:800;cursor:pointer;touch-action:manipulation}
     .type-button small{display:block;color:var(--muted);font-size:.73em;font-weight:600}
     .type-button.active{border-color:#7c3aed;color:#5b21b6;background:#ede9fe;box-shadow:0 0 0 2px rgba(124,58,237,.12)}
     .selected-note{min-height:24px;color:var(--muted);font-size:.92rem}
@@ -204,15 +215,15 @@ function render(){
   const area=$("sentence");area.replaceChildren();
   words.forEach((w,i)=>{
     const b=document.createElement("button");b.type="button";b.className="word";b.textContent=w.text;
-    b.setAttribute("aria-label",`${w.text}, Wort ${i+1}${answers[i]?`, zugeordnet: ${answers[i]}`:""}`);
+    b.setAttribute("aria-label",`${w.text}, Wort ${i+1}${answers[i]?`, zugeordnet: ${answers[i]}`:""}`);if(answers[i])b.dataset.type=answers[i];
     if(i===selected)b.classList.add("selected");
-    if(checked){if(answers[i]===w.type)b.classList.add("correct");else b.classList.add("wrong");const tag=document.createElement("span");tag.className="answer-tag";tag.textContent=answers[i]||"noch offen";b.append(tag);}
+    if(checked){if(answers[i]===w.type)b.classList.add("correct");else b.classList.add("wrong");}if(answers[i]||checked){const tag=document.createElement("span");tag.className="answer-tag";tag.textContent=answers[i]||"noch offen";b.append(tag);}
     b.addEventListener("click",()=>{if(checked&&answers[i]===w.type)return;selected=i;render();});
     area.append(b);if(w.punct){const p=document.createElement("span");p.textContent=w.punct;area.append(p);}
   });
   const palette=$("wordTypes");palette.replaceChildren();
-  TYPES.forEach(type=>{const b=document.createElement("button");b.className="type-button";b.type="button";b.innerHTML=`${type}<small>${TYPE_HINTS[type]}</small>`;b.disabled=selected<0||(checked&&answers[selected]===words[selected].type);b.addEventListener("click",()=>assign(type));palette.append(b);});
-  $("selectedNote").textContent=selected<0?"Wähle ein Wort im Satz aus.":`Ausgewählt: „${words[selected].text}“ · jetzt die Wortart antippen.`;
+  TYPES.forEach(type=>{const b=document.createElement("button");b.className="type-button";b.type="button";b.dataset.type=type;b.setAttribute("aria-label",type);b.innerHTML=`${type}<small>${TYPE_HINTS[type]}</small>`;b.disabled=selected<0||(checked&&answers[selected]===words[selected].type);b.addEventListener("click",()=>assign(type));palette.append(b);});
+  $("selectedNote").textContent=selected<0?"Tippe ein Wort im Satz an; die gewählte Wortart erscheint direkt darunter.":`Ausgewählt: „${words[selected].text}“ · jetzt die Wortart antippen.`;
   $("check").classList.remove("hidden");$("check").disabled=answers.some(a=>!a);$("check").textContent=checked?"Erneut prüfen":"Antwort prüfen";
   const allCorrect=checked&&words.every((w,i)=>answers[i]===w.type);$("check").classList.toggle("hidden",allCorrect);$("next").classList.toggle("hidden",!allCorrect);
   $("feedback").textContent=feedbackText;$("feedback").className="task-feedback"+(feedbackKind?` ${feedbackKind}`:"");
@@ -225,7 +236,7 @@ function check(){
   render();if(misses===0){$("next").focus({preventScroll:true});}
 }
 function advance(){round+=1;if(round>=queue.length){$("finishMessage").textContent=`Du hast ${queue.length} Sätze auf der Stufe „${TITLES[level]}“ bearbeitet und ${totalCorrect} Wörter korrekt zugeordnet. ${firstTry===queue.length?"Jeder Satz war gleich beim ersten Prüfen richtig!":`Beim ersten Prüfen waren ${firstTry} Sätze schon vollständig richtig.`}`;$("progressBar").style.width="100%";show("finish");return;}answers=Array(parse(queue[round]).length).fill("");selected=-1;checked=false;roundCheckedOnce=false;feedbackText="";feedbackKind="";$("check").textContent="Antwort prüfen";render();$("sentence").scrollIntoView({behavior:"smooth",block:"center"});}
-$("wordTypes").addEventListener("click",e=>{const btn=e.target.closest(".type-button");if(btn)assign(btn.childNodes[0].textContent.trim());});
+
 document.querySelectorAll(".level-card").forEach(b=>b.addEventListener("click",()=>start(b.dataset.level)));
 $("check").addEventListener("click",check);
 $("next").addEventListener("click",advance);
