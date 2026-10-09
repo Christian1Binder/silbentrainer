@@ -49,7 +49,7 @@
     .word-types{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:16px 0}
     .type-button{min-height:48px;padding:8px 6px;border:1px solid var(--cat-border,var(--line));border-radius:13px;background:var(--cat-bg,#fff);color:var(--cat-ink,var(--ink));font-weight:800;cursor:pointer;touch-action:manipulation}
     .type-button small{display:block;color:var(--muted);font-size:.73em;font-weight:600}
-    .type-button.active{border-color:#7c3aed;color:#5b21b6;background:#ede9fe;box-shadow:0 0 0 2px rgba(124,58,237,.12)}
+    .type-button.active{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.2)}
     .selected-note{min-height:24px;color:var(--muted);font-size:.92rem}
     .task-feedback{min-height:50px;margin:12px 0;padding:12px 14px;border-radius:14px;background:#f5f3ff;color:#4c1d95;line-height:1.45}
     .task-feedback:empty{display:none}
@@ -118,7 +118,7 @@
         <span class="task-count" id="taskCount">Satz 1 von 15</span>
       </div>
       <div class="progress-track" aria-label="Fortschritt"><span id="progressBar" style="width:0%"></span></div>
-      <p class="prompt">1. Tippe ein Wort an. 2. Wähle die passende Wortart.</p>
+      <p class="prompt">Wähle eine Wortart und tippe passende Wörter an – oder tippe erst ein Wort und dann die Wortart.</p>
       <div class="sentence" id="sentence" aria-label="Satz mit auswählbaren Wörtern"></div>
       <p class="selected-note" id="selectedNote">Wähle ein Wort im Satz aus.</p>
       <div class="word-types" id="wordTypes" aria-label="Wortart auswählen"></div>
@@ -142,7 +142,7 @@
       </div>
     </section>
 
-    <footer class="foot">Silbenhelden · Wortarten-Training · Lernfortschritt bleibt auf diesem Gerät</footer>
+    <footer class="foot">Silbenhelden · Wortarten-Training · Ohne Anmeldung und ohne Datenübertragung</footer>
   </main>
 
 <script>
@@ -203,11 +203,11 @@ const SETS = {
   ]
 };
 const TITLES={leicht:"Grundschule",mittel:"Realschule",schwer:"Ab Klasse 10 / Gymnasium"};
-let level="leicht",round=0,queue=[],answers=[],selected=-1,checked=false,roundCheckedOnce=false,totalCorrect=0,firstTry=0,feedbackText="",feedbackKind="";
+let level="leicht",round=0,queue=[],answers=[],selected=-1,activeType="",checked=false,roundCheckedOnce=false,totalCorrect=0,firstTry=0,feedbackText="",feedbackKind="";
 const $=id=>document.getElementById(id);
 function parse(raw){return raw.trim().split(/\s+/).filter(Boolean).map(piece=>{if(piece.endsWith("|"))piece=piece.slice(0,-1);const match=piece.match(/^(.+)\|([^|.,!?;:]+)([.,!?;:]*)$/u);if(!match)throw new Error("Ungültige Aufgabenangabe: "+piece);return {text:match[1],type:match[2],punct:match[3]};});}
 function show(view){$("home").classList.toggle("hidden",view!=="home");$("lesson").classList.toggle("hidden",view!=="lesson");$("finish").classList.toggle("hidden",view!=="finish");window.scrollTo({top:0,behavior:"smooth"});}
-function start(which){level=which;round=0;queue=[...SETS[level]];answers=Array(parse(queue[0]).length).fill("");selected=-1;checked=false;roundCheckedOnce=false;totalCorrect=0;firstTry=0;feedbackText="";feedbackKind="";$("levelName").textContent=TITLES[level];show("lesson");render();}
+function start(which){level=which;round=0;queue=[...SETS[level]];answers=Array(parse(queue[0]).length).fill("");selected=-1;activeType="";checked=false;roundCheckedOnce=false;totalCorrect=0;firstTry=0;feedbackText="";feedbackKind="";$("levelName").textContent=TITLES[level];show("lesson");render();}
 function render(){
   const words=parse(queue[round]);
   $("taskCount").textContent=`Satz ${round+1} von ${queue.length}`;
@@ -218,24 +218,24 @@ function render(){
     b.setAttribute("aria-label",`${w.text}, Wort ${i+1}${answers[i]?`, zugeordnet: ${answers[i]}`:""}`);if(answers[i])b.dataset.type=answers[i];
     if(i===selected)b.classList.add("selected");
     if(checked){if(answers[i]===w.type)b.classList.add("correct");else b.classList.add("wrong");}if(answers[i]||checked){const tag=document.createElement("span");tag.className="answer-tag";tag.textContent=answers[i]||"noch offen";b.append(tag);}
-    b.addEventListener("click",()=>{if(checked&&answers[i]===w.type)return;selected=i;render();});
+    b.addEventListener("click",()=>{if(checked&&answers[i]===w.type)return;if(activeType){answers[i]=activeType;selected=-1;render();return;}selected=i;render();});
     area.append(b);if(w.punct){const p=document.createElement("span");p.textContent=w.punct;area.append(p);}
   });
   const palette=$("wordTypes");palette.replaceChildren();
-  TYPES.forEach(type=>{const b=document.createElement("button");b.className="type-button";b.type="button";b.dataset.type=type;b.setAttribute("aria-label",type);b.innerHTML=`${type}<small>${TYPE_HINTS[type]}</small>`;b.disabled=selected<0||(checked&&answers[selected]===words[selected].type);b.addEventListener("click",()=>assign(type));palette.append(b);});
-  $("selectedNote").textContent=selected<0?"Tippe ein Wort im Satz an; die gewählte Wortart erscheint direkt darunter.":`Ausgewählt: „${words[selected].text}“ · jetzt die Wortart antippen.`;
+  TYPES.forEach(type=>{const b=document.createElement("button");b.className="type-button";b.type="button";b.dataset.type=type;b.classList.toggle("active",type===activeType);b.setAttribute("aria-pressed",String(type===activeType));b.setAttribute("aria-label",type);b.innerHTML=`${type}<small>${TYPE_HINTS[type]}</small>`;b.addEventListener("click",()=>assign(type));palette.append(b);});
+  $("selectedNote").textContent=selected>=0?`Ausgewählt: „${words[selected].text}“ · jetzt die Wortart antippen.`:activeType?`Aktive Wortart: ${activeType} · tippe passende Wörter an. Erneut antippen, um abzuwählen.`:"Wähle eine Wortart und tippe passende Wörter an – oder tippe zuerst ein Wort an.";
   $("check").classList.remove("hidden");$("check").disabled=answers.some(a=>!a);$("check").textContent=checked?"Erneut prüfen":"Antwort prüfen";
   const allCorrect=checked&&words.every((w,i)=>answers[i]===w.type);$("check").classList.toggle("hidden",allCorrect);$("next").classList.toggle("hidden",!allCorrect);
   $("feedback").textContent=feedbackText;$("feedback").className="task-feedback"+(feedbackKind?` ${feedbackKind}`:"");
 }
-function assign(type){if(selected<0)return;answers[selected]=type;selected=-1;render();}
+function assign(type){if(selected<0){activeType=activeType===type?"":type;render();return;}answers[selected]=type;selected=-1;activeType="";render();}
 function check(){
-  const words=parse(queue[round]);const firstAttempt=!roundCheckedOnce;roundCheckedOnce=true;const misses=words.filter((w,i)=>answers[i]!==w.type).length;checked=true;
+  const words=parse(queue[round]);activeType="";selected=-1;const firstAttempt=!roundCheckedOnce;roundCheckedOnce=true;const misses=words.filter((w,i)=>answers[i]!==w.type).length;checked=true;
   if(misses===0){totalCorrect+=words.length;if(firstAttempt)firstTry+=1;feedbackText="Alles richtig! Du hast jedem Wort die passende Wortart zugeordnet.";feedbackKind="success";}
   else{feedbackText=`Schon ${words.length-misses} von ${words.length} richtig. Falsche Wörter sind markiert. Tippe ein rot markiertes Wort an, ändere die Zuordnung und prüfe erneut.`;feedbackKind="retry";}
   render();if(misses===0){$("next").focus({preventScroll:true});}
 }
-function advance(){round+=1;if(round>=queue.length){$("finishMessage").textContent=`Du hast ${queue.length} Sätze auf der Stufe „${TITLES[level]}“ bearbeitet und ${totalCorrect} Wörter korrekt zugeordnet. ${firstTry===queue.length?"Jeder Satz war gleich beim ersten Prüfen richtig!":`Beim ersten Prüfen waren ${firstTry} Sätze schon vollständig richtig.`}`;$("progressBar").style.width="100%";show("finish");return;}answers=Array(parse(queue[round]).length).fill("");selected=-1;checked=false;roundCheckedOnce=false;feedbackText="";feedbackKind="";$("check").textContent="Antwort prüfen";render();$("sentence").scrollIntoView({behavior:"smooth",block:"center"});}
+function advance(){round+=1;if(round>=queue.length){$("finishMessage").textContent=`Du hast ${queue.length} Sätze auf der Stufe „${TITLES[level]}“ bearbeitet und ${totalCorrect} Wörter korrekt zugeordnet. ${firstTry===queue.length?"Jeder Satz war gleich beim ersten Prüfen richtig!":`Beim ersten Prüfen waren ${firstTry} Sätze schon vollständig richtig.`}`;$("progressBar").style.width="100%";show("finish");return;}answers=Array(parse(queue[round]).length).fill("");selected=-1;activeType="";checked=false;roundCheckedOnce=false;feedbackText="";feedbackKind="";$("check").textContent="Antwort prüfen";render();$("sentence").scrollIntoView({behavior:"smooth",block:"center"});}
 
 document.querySelectorAll(".level-card").forEach(b=>b.addEventListener("click",()=>start(b.dataset.level)));
 $("check").addEventListener("click",check);
