@@ -26,6 +26,12 @@
     .lesson-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
     .lesson-top h1{margin:4px 0;font-size:clamp(1.45rem,4vw,2.2rem)}
     .task-count{white-space:nowrap;padding:9px 12px;border-radius:999px;background:var(--primary-soft);color:var(--primary-dark);font-weight:900}
+    .score-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:12px 0}
+    .bonus-badge{padding:8px 12px;border:1px solid #f2dda2;border-radius:999px;background:#fff6df;color:#805b14;font-weight:900}
+    .bonus-badge.triple{border-color:#f4d0bb;background:#fff0e8;color:#98532d}
+    .score-chip{padding:8px 12px;border-radius:999px;background:#f4edfb;color:#674389;font-weight:800;white-space:nowrap}
+    .score-final{display:grid;gap:4px;justify-items:center;width:min(250px,100%);margin:20px auto;padding:18px;border:1px solid #dfcdef;border-radius:18px;background:#f4edfb;color:#674389}
+    .score-final strong{font-size:2rem}
     .progress-track{height:10px;margin:16px 0 22px;overflow:hidden;border-radius:99px;background:#eeeaf7}
     .progress-track span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#7c3aed,#ec4899);transition:width .2s}
     .prompt{margin:0 0 8px;color:var(--muted);font-weight:700}
@@ -91,7 +97,7 @@
         <p>Tippe ein Wort im Satz an und ordne ihm eine Wortart zu. Du kannst Wörter jederzeit verbessern. Erst wenn alles stimmt, geht es zum nächsten Satz.</p>
       </div>
       <div class="level-grid" aria-label="Schwierigkeit auswählen">
-        <button class="level-card" data-level="leicht"><span class="level-emoji">🌱</span><strong>Einfach · Grundschule</strong><span>Kurze, klare Sätze. Nomen, Verben, Adjektive, Artikel und erste Adverbien erkennen.</span></button>
+        <button class="level-card" data-level="leicht"><span class="level-emoji">🌱</span><strong>Einfach · Grundschule</strong><span>Kurze, klare Sätze; drei Pronomen-Sonderaufgaben pro Runde mit doppelten oder dreifachen Punkten.</span></button>
         <button class="level-card" data-level="mittel"><span class="level-emoji">🚀</span><strong>Normal · Realschule</strong><span>Längere Sätze mit Pronomen, Präpositionen, Adverbien und Bindewörtern.</span></button>
         <button class="level-card" data-level="schwer"><span class="level-emoji">🧩</span><strong>Knifflig · ab Klasse 10 / Gymnasium</strong><span>Komplexe Satzgefüge, Nominalisierungen, Passiv und Wortarten im Zusammenhang.</span></button>
       </div>
@@ -118,6 +124,7 @@
         <span class="task-count" id="taskCount">Satz 1 von 15</span>
       </div>
       <div class="progress-track" aria-label="Fortschritt"><span id="progressBar" style="width:0%"></span></div>
+      <div class="score-row"><span class="bonus-badge hidden" id="bonusBadge"></span><span class="score-chip">⭐ Punkte <strong id="scoreNow">0</strong></span></div>
       <p class="prompt">Wähle eine Wortart und tippe passende Wörter an – oder tippe erst ein Wort und dann die Wortart.</p>
       <div class="sentence" id="sentence" aria-label="Satz mit auswählbaren Wörtern"></div>
       <p class="selected-note" id="selectedNote">Wähle ein Wort im Satz aus.</p>
@@ -136,7 +143,8 @@
       <span class="eyebrow">Training beendet</span>
       <h1>Stark gemacht!</h1>
       <p id="finishMessage"></p>
-      <div class="hero-actions" style="justify-content:center">
+      <div class="score-final"><span>Gesammelte Punkte</span><strong id="finalScore">0</strong></div>
+      <div class="hero-actions" style="justify-content:center>
         <button class="btn primary large" id="repeat">Gleiche Stufe noch einmal</button>
         <button class="btn soft large" id="choose">Andere Stufe wählen</button>
       </div>
@@ -165,7 +173,9 @@ const SETS = {
     "Meine|Pronomen Schwester|Nomen singt|Verb.|",
     "Der|Artikel rote|Adjektiv Bus|Nomen hält|Verb hier|Adverb.|",
     "Das|Artikel Pferd|Nomen frisst|Verb frisches|Adjektiv Gras|Nomen.|",
-    "Ein|Artikel müder|Adjektiv Bär|Nomen schläft|Verb lange|Adjektiv."
+    "Ich|Pronomen sehe|Verb ihn|Pronomen heute|Adverb.",
+    "Sie|Pronomen schenkt|Verb dem|Artikel kleinen|Adjektiv Hund|Nomen seinen|Pronomen alten|Adjektiv Ball|Nomen.",
+    "Wenn|Konjunktion du|Pronomen dich|Pronomen beeilst|Verb, erreichst|Verb du|Pronomen noch|Adverb den|Artikel Bus|Nomen."
   ],
   mittel: [
     "Heute|Adverb fährt|Verb meine|Pronomen Freundin|Nomen mit|Präposition dem|Artikel Bus|Nomen in|Präposition die|Artikel Schule|Nomen.|",
@@ -203,14 +213,15 @@ const SETS = {
   ]
 };
 const TITLES={leicht:"Grundschule",mittel:"Realschule",schwer:"Ab Klasse 10 / Gymnasium"};
-let level="leicht",round=0,queue=[],answers=[],selected=-1,activeType="",checked=false,roundCheckedOnce=false,totalCorrect=0,firstTry=0,feedbackText="",feedbackKind="";
+const BONUS_TASKS={leicht:{12:{label:"✨ Sonderaufgabe · 2× Punkte",multiplier:2},13:{label:"✨ Sonderaufgabe · 2× Punkte",multiplier:2},14:{label:"🔥 Extra knifflig · 3× Punkte",multiplier:3}}};
+let level="leicht",round=0,queue=[],answers=[],selected=-1,activeType="",checked=false,roundCheckedOnce=false,totalCorrect=0,firstTry=0,score=0,feedbackText="",feedbackKind="";
 const $=id=>document.getElementById(id);
-function parse(raw){return raw.trim().split(/\s+/).filter(Boolean).map(piece=>{if(piece.endsWith("|"))piece=piece.slice(0,-1);const match=piece.match(/^(.+)\|([^|.,!?;:]+)([.,!?;:]*)$/u);if(!match)throw new Error("Ungültige Aufgabenangabe: "+piece);return {text:match[1],type:match[2],punct:match[3]};});}
+function taskInfo(){return BONUS_TASKS[level]?.[round]||null;}\nfunction parse(raw){return raw.trim().split(/\s+/).filter(Boolean).map(piece=>{if(piece.endsWith("|"))piece=piece.slice(0,-1);const match=piece.match(/^(.+)\|([^|.,!?;:]+)([.,!?;:]*)$/u);if(!match)throw new Error("Ungültige Aufgabenangabe: "+piece);return {text:match[1],type:match[2],punct:match[3]};});}
 function show(view){$("home").classList.toggle("hidden",view!=="home");$("lesson").classList.toggle("hidden",view!=="lesson");$("finish").classList.toggle("hidden",view!=="finish");window.scrollTo({top:0,behavior:"smooth"});}
-function start(which){level=which;round=0;queue=[...SETS[level]];answers=Array(parse(queue[0]).length).fill("");selected=-1;activeType="";checked=false;roundCheckedOnce=false;totalCorrect=0;firstTry=0;feedbackText="";feedbackKind="";$("levelName").textContent=TITLES[level];show("lesson");render();}
+function start(which){level=which;round=0;queue=[...SETS[level]];answers=Array(parse(queue[0]).length).fill("");selected=-1;activeType="";checked=false;roundCheckedOnce=false;totalCorrect=0;firstTry=0;score=0;feedbackText="";feedbackKind="";$("levelName").textContent=TITLES[level];show("lesson");render();}
 function render(){
   const words=parse(queue[round]);
-  $("taskCount").textContent=`Satz ${round+1} von ${queue.length}`;
+  $("taskCount").textContent=`Aufgabe ${round+1} von ${queue.length}`;const bonus=taskInfo();$("bonusBadge").textContent=bonus?.label||"";$("bonusBadge").classList.toggle("hidden",!bonus);$("bonusBadge").classList.toggle("triple",bonus?.multiplier===3);$("scoreNow").textContent=score;
   $("progressBar").style.width=`${round/queue.length*100}%`;
   const area=$("sentence");area.replaceChildren();
   words.forEach((w,i)=>{
@@ -231,11 +242,11 @@ function render(){
 function assign(type){if(selected<0){activeType=activeType===type?"":type;render();return;}answers[selected]=type;selected=-1;activeType="";render();}
 function check(){
   const words=parse(queue[round]);activeType="";selected=-1;const firstAttempt=!roundCheckedOnce;roundCheckedOnce=true;const misses=words.filter((w,i)=>answers[i]!==w.type).length;checked=true;
-  if(misses===0){totalCorrect+=words.length;if(firstAttempt)firstTry+=1;feedbackText="Alles richtig! Du hast jedem Wort die passende Wortart zugeordnet.";feedbackKind="success";}
+  if(misses===0){totalCorrect+=words.length;if(firstAttempt)firstTry+=1;const multiplier=taskInfo()?.multiplier||1;const earned=words.length*multiplier;score+=earned;feedbackText=`Alles richtig! +${earned} Punkte${multiplier>1?` (${words.length} Wörter × ${multiplier})`:""}.`;feedbackKind="success";}
   else{feedbackText=`Schon ${words.length-misses} von ${words.length} richtig. Falsche Wörter sind markiert. Tippe ein rot markiertes Wort an, ändere die Zuordnung und prüfe erneut.`;feedbackKind="retry";}
   render();if(misses===0){$("next").focus({preventScroll:true});}
 }
-function advance(){round+=1;if(round>=queue.length){$("finishMessage").textContent=`Du hast ${queue.length} Sätze auf der Stufe „${TITLES[level]}“ bearbeitet und ${totalCorrect} Wörter korrekt zugeordnet. ${firstTry===queue.length?"Jeder Satz war gleich beim ersten Prüfen richtig!":`Beim ersten Prüfen waren ${firstTry} Sätze schon vollständig richtig.`}`;$("progressBar").style.width="100%";show("finish");return;}answers=Array(parse(queue[round]).length).fill("");selected=-1;activeType="";checked=false;roundCheckedOnce=false;feedbackText="";feedbackKind="";$("check").textContent="Antwort prüfen";render();$("sentence").scrollIntoView({behavior:"smooth",block:"center"});}
+function advance(){round+=1;if(round>=queue.length){$("finishMessage").textContent=`Du hast ${queue.length} Aufgaben auf der Stufe „${TITLES[level]}“ bearbeitet und ${totalCorrect} Wörter korrekt zugeordnet. ${firstTry===queue.length?"Jede Aufgabe war gleich beim ersten Prüfen richtig!":`Beim ersten Prüfen waren ${firstTry} Aufgaben schon vollständig richtig.`}`;$("finalScore").textContent=score;$("progressBar").style.width="100%";show("finish");return;}answers=Array(parse(queue[round]).length).fill("");selected=-1;activeType="";checked=false;roundCheckedOnce=false;feedbackText="";feedbackKind="";$("check").textContent="Antwort prüfen";render();$("sentence").scrollIntoView({behavior:"smooth",block:"center"});}
 
 document.querySelectorAll(".level-card").forEach(b=>b.addEventListener("click",()=>start(b.dataset.level)));
 $("check").addEventListener("click",check);
