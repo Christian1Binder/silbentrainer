@@ -22,6 +22,15 @@
     .level-card strong{display:block;margin:7px 0;font-size:1.15rem}
     .level-card span{color:var(--muted);line-height:1.45}
     .level-emoji{font-size:1.6rem}
+    .task-picker{margin-top:24px;padding:22px;border:1px solid var(--line);border-radius:20px;background:#fff;box-shadow:var(--shadow-small)}
+    .task-picker h2{margin:0 0 6px;font-size:clamp(1.25rem,4vw,1.7rem)}
+    .task-picker p{margin:0 0 16px;color:var(--muted);line-height:1.5}
+    .task-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .task-option{min-height:78px;border:2px solid var(--line);border-radius:16px;background:#fff;color:var(--ink);font-size:1.2rem;font-weight:900;cursor:pointer;touch-action:manipulation}
+    .task-option small{display:block;margin-top:3px;color:var(--muted);font-size:.75rem;font-weight:600}
+    .task-option[aria-pressed="true"]{border-color:#7c3aed;background:#f5f0ff;color:#5b21b6;box-shadow:0 0 0 3px rgba(124,58,237,.13)}
+    .task-picker-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+    .task-picker-actions .btn{min-height:48px}
     .lesson{margin-top:20px;padding:clamp(18px,4vw,32px)}
     .lesson-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
     .lesson-top h1{margin:4px 0;font-size:clamp(1.45rem,4vw,2.2rem)}
@@ -96,12 +105,25 @@
         <h1>Wort für Wort zum Sprachprofi</h1>
         <p>Tippe ein Wort im Satz an und ordne ihm eine Wortart zu. Du kannst Wörter jederzeit verbessern. Erst wenn alles stimmt, geht es zum nächsten Satz.</p>
       </div>
-      <div class="level-grid" aria-label="Schwierigkeit auswählen">
-        <button class="level-card" data-level="leicht"><span class="level-emoji">🌱</span><strong>Einfach · Grundschule</strong><span>Kurze, klare Sätze; drei Pronomen-Sonderaufgaben pro Runde mit doppelten oder dreifachen Punkten.</span></button>
+      <div class="level-grid" id="levelGrid" aria-label="Schwierigkeit auswählen">
+        <button class="level-card" data-level="leicht"><span class="level-emoji">🌱</span><strong>Einfach · Grundschule</strong><span>Kurze, klare Sätze für die Grundschule; etwa jede fünfte Aufgabe ist eine Pronomen-Sonderaufgabe mit Bonuspunkten.</span></button>
         <button class="level-card" data-level="mittel"><span class="level-emoji">🚀</span><strong>Normal · Realschule</strong><span>Längere Sätze mit Pronomen, Präpositionen, Adverbien und Bindewörtern.</span></button>
         <button class="level-card" data-level="schwer"><span class="level-emoji">🧩</span><strong>Knifflig · ab Klasse 10 / Gymnasium</strong><span>Komplexe Satzgefüge, Nominalisierungen, Passiv und Wortarten im Zusammenhang.</span></button>
       </div>
-      <details class="guide">
+      <div class="task-picker hidden" id="taskPicker" aria-live="polite">
+        <h2 id="taskPickerTitle">Wie viele Aufgaben möchtest du lösen?</h2>
+        <p>Wähle den Umfang für diesen Durchgang. In der leichten Stufe kommen die Pronomen-Sonderaufgaben am Ende.</p>
+        <div class="task-options" role="group" aria-label="Anzahl der Aufgaben">
+          <button class="task-option" type="button" data-count="10" aria-pressed="false">10<small>Aufgaben</small></button>
+          <button class="task-option" type="button" data-count="20" aria-pressed="false">20<small>Aufgaben</small></button>
+          <button class="task-option" type="button" data-count="30" aria-pressed="false">30<small>Aufgaben</small></button>
+        </div>
+        <div class="task-picker-actions">
+          <button class="btn gray" id="backToLevels" type="button">Zurück</button>
+          <button class="btn primary" id="startTraining" type="button" disabled>Training starten</button>
+        </div>
+      </div>
+      <details class="guide" id="guide">
         <summary>Wortarten-Merkhilfe anzeigen</summary>
         <div class="guide-grid">
           <div class="guide-item"><strong>Nomen:</strong> Menschen, Tiere, Dinge und Begriffe; oft mit der/die/das. <em>Hund, Freude</em></div>
@@ -211,13 +233,51 @@ const SETS = {
   ]
 };
 const TITLES={leicht:"Grundschule",mittel:"Realschule",schwer:"Ab Klasse 10 / Gymnasium"};
-const BONUS_TASKS={leicht:{12:{label:"✨ Sonderaufgabe · 2× Punkte",multiplier:2},13:{label:"✨ Sonderaufgabe · 2× Punkte",multiplier:2},14:{label:"🔥 Extra knifflig · 3× Punkte",multiplier:3}}};
-let level="leicht",round=0,queue=[],answers=[],selected=-1,activeType="",checked=false,roundCheckedOnce=false,totalCorrect=0,firstTry=0,score=0,feedbackText="",feedbackKind="";
+const BONUS_LABELS={2:"✨ Sonderaufgabe · 2× Punkte",3:"🔥 Extra knifflig · 3× Punkte"};
+let level="leicht",round=0,queue=[],answers=[],selected=-1,activeType="",checked=false,roundCheckedOnce=false,totalCorrect=0,firstTry=0,score=0,feedbackText="",feedbackKind="",requestedCount=10,selectedLevel="",selectedCount=0,BONUS_TASKS={};
 const $=id=>document.getElementById(id);
-function taskInfo(){return BONUS_TASKS[level]?.[round]||null;}
+function tagged(word,type){return word+"|"+type;}
+function shuffled(items){const copy=items.slice();for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}return copy;}
+function expandPools(){
+  const seen={leicht:new Set(SETS.leicht),mittel:new Set(SETS.mittel),schwer:new Set(SETS.schwer)};
+  const subjects=["Der|Artikel kleine|Adjektiv Hund|Nomen","Die|Artikel flinke|Adjektiv Katze|Nomen","Das|Artikel fröhliche|Adjektiv Kind|Nomen","Der|Artikel bunte|Adjektiv Vogel|Nomen","Das|Artikel junge|Adjektiv Pferd|Nomen","Der|Artikel schnelle|Adjektiv Hase|Nomen","Die|Artikel nette|Adjektiv Nachbarin|Nomen","Der|Artikel geduldige|Adjektiv Lehrer|Nomen","Die|Artikel kluge|Adjektiv Schülerin|Nomen","Der|Artikel kleine|Adjektiv Bruder|Nomen"];
+  const verbs=[["bellt","rennt","schläft","wartet","spielt","läuft","springt","sitzt","steht","hüpft"],["miaut","rennt","schläft","wartet","spielt","läuft","springt","sitzt","steht","hüpft"],["lacht","rennt","schläft","wartet","spielt","läuft","springt","sitzt","lernt","hüpft"],["fliegt","singt","landet","wartet","spielt","läuft","springt","sitzt","steht","hüpft"],["galoppiert","rennt","schläft","wartet","spielt","läuft","springt","steht","frisst","grast"],["hoppelt","rennt","schläft","wartet","spielt","läuft","springt","sitzt","frisst","grast"],["arbeitet","rennt","wartet","spielt","läuft","sitzt","steht","lernt","lacht","tanzt"],["arbeitet","rennt","wartet","spielt","läuft","sitzt","steht","lernt","lacht","singt"],["lernt","rennt","wartet","spielt","läuft","sitzt","steht","liest","lacht","tanzt"],["lernt","rennt","wartet","spielt","läuft","sitzt","steht","liest","lacht","singt"]];
+  const adverbs=["heute|Adverb","oft|Adverb","morgens|Adverb"];
+  for(let i=0;i<subjects.length;i++)for(const verb of verbs[i])for(const adv of adverbs){const s=subjects[i]+" "+tagged(verb,"Verb")+" "+adv+".";if(!seen.leicht.has(s)){seen.leicht.add(s);SETS.leicht.push(s);}}
+  const pronouns=["Ich|Pronomen spiele|Verb","Du|Pronomen spielst|Verb","Er|Pronomen spielt|Verb","Sie|Pronomen spielt|Verb","Wir|Pronomen spielen|Verb","Ihr|Pronomen spielt|Verb"];
+  const objects=["dem|Artikel Ball|Nomen","der|Artikel Puppe|Nomen","dem|Artikel Hund|Nomen","der|Artikel Katze|Nomen","den|Artikel Bausteinen|Nomen","dem|Artikel Drachen|Nomen","meiner|Pronomen Freundin|Nomen","den|Artikel Karten|Nomen","dem|Artikel Seil|Nomen","dem|Artikel Teddy|Nomen"];
+  const playAdverbs=["heute|Adverb","gern|Adverb","draußen|Adverb","nachmittags|Adverb","oft|Adverb","zusammen|Adverb"];
+  for(const p of pronouns)for(const adv of playAdverbs)for(const obj of objects){const s=p+" "+adv+" mit|Präposition "+obj+".";if(!seen.leicht.has(s)){seen.leicht.add(s);SETS.leicht.push(s);}}
+  const cores=[
+    "Ich|Pronomen bearbeite|Verb eine|Artikel schwierige|Adjektiv Aufgabe|Nomen","Du|Pronomen löst|Verb die|Artikel knifflige|Adjektiv Frage|Nomen","Er|Pronomen beantwortet|Verb eine|Artikel wichtige|Adjektiv Frage|Nomen","Sie|Pronomen schreibt|Verb eine|Artikel ausführliche|Adjektiv Nachricht|Nomen","Wir|Pronomen vergleichen|Verb die|Artikel verschiedenen|Adjektiv Ergebnisse|Nomen","Ihr|Pronomen lest|Verb den|Artikel interessanten|Adjektiv Text|Nomen","Die|Artikel Gruppe|Nomen plant|Verb eine|Artikel gemeinsame|Adjektiv Präsentation|Nomen","Lena|Nomen und|Konjunktion Amir|Nomen suchen|Verb den|Artikel fehlenden|Adjektiv Schlüssel|Nomen","Die|Artikel Lehrerin|Nomen erklärt|Verb eine|Artikel schwierige|Adjektiv Regel|Nomen","Mehrere|Zahlwort Schüler|Nomen untersuchen|Verb den|Artikel spannenden|Adjektiv Versuch|Nomen","Die|Artikel Forschenden|Nomen prüfen|Verb die|Artikel gesammelten|Adjektiv Daten|Nomen","Ich|Pronomen ordne|Verb die|Artikel wichtigen|Adjektiv Hinweise|Nomen","Du|Pronomen findest|Verb den|Artikel entscheidenden|Adjektiv Fehler|Nomen","Er|Pronomen vergleicht|Verb beide|Pronomen Ergebnisse|Nomen","Sie|Pronomen ordnet|Verb die|Artikel einzelnen|Adjektiv Wörter|Nomen","Wir|Pronomen besprechen|Verb den|Artikel neuen|Adjektiv Plan|Nomen","Ihr|Pronomen sammelt|Verb wichtige|Adjektiv Informationen|Nomen","Die|Artikel Kinder|Nomen üben|Verb das|Artikel schwierige|Adjektiv Gedicht|Nomen","Paul|Nomen und|Konjunktion Lea|Nomen entwerfen|Verb einen|Artikel eigenen|Adjektiv Fragebogen|Nomen","Unsere|Pronomen Klasse|Nomen organisiert|Verb den|Artikel nächsten|Adjektiv Ausflug|Nomen"
+  ];
+  const tails=["heute|Adverb in|Präposition der|Artikel Schule|Nomen","nachmittags|Adverb in|Präposition der|Artikel Bibliothek|Nomen","morgen|Adverb in|Präposition dem|Artikel Jugendhaus|Nomen","regelmäßig|Adverb mit|Präposition meiner|Pronomen Gruppe|Nomen","gemeinsam|Adverb vor|Präposition dem|Artikel Unterricht|Nomen","an|Präposition dem|Artikel Nachmittag|Nomen zu|Präposition Hause|Nomen","später|Adverb in|Präposition dem|Artikel Klassenraum|Nomen","oft|Adverb nach|Präposition dem|Artikel Essen|Nomen","manchmal|Adverb bei|Präposition der|Artikel Projektarbeit|Nomen","heute|Adverb auf|Präposition dem|Artikel Schulhof|Nomen","morgen|Adverb in|Präposition der|Artikel Lernwerkstatt|Nomen","konzentriert|Adverb während|Präposition der|Artikel Arbeitszeit|Nomen","nach|Präposition dem|Artikel Training|Nomen gemeinsam|Adverb","vor|Präposition dem|Artikel Abendessen|Nomen in|Präposition der|Artikel Küche|Nomen","an|Präposition dem|Artikel Wochenende|Nomen mit|Präposition großer|Adjektiv Sorgfalt|Nomen"];
+  for(const core of cores)for(const tail of tails){const s=core+" "+tail+".";if(!seen.mittel.has(s)){seen.mittel.add(s);SETS.mittel.push(s);}}
+  const hardSubjects=["die|Artikel sorgfältige|Adjektiv Analyse|Nomen","der|Artikel methodische|Adjektiv Vergleich|Nomen","die|Artikel kritische|Adjektiv Beobachtung|Nomen","das|Artikel wiederholte|Adjektiv Prüfen|Nomen","der|Artikel begründete|Adjektiv Einwand|Nomen","die|Artikel vorläufige|Adjektiv Deutung|Nomen","das|Artikel sorgfältige|Adjektiv Abwägen|Nomen","die|Artikel nachvollziehbare|Adjektiv Begründung|Nomen","der|Artikel systematische|Adjektiv Versuch|Nomen","die|Artikel veröffentlichte|Adjektiv Analyse|Nomen"];
+  const predicates=["plausibel","schlüssig","überzeugend","eindeutig","belastbar","nachvollziehbar","vollständig","differenziert","systematisch","sorgfältig"];
+  const outcomes=["das|Artikel Ergebnis|Nomen umstritten|Adjektiv","die|Artikel Schlussfolgerung|Nomen fragwürdig|Adjektiv","die|Artikel These|Nomen ungeklärt|Adjektiv","der|Artikel Befund|Nomen unklar|Adjektiv","das|Artikel Modell|Nomen vorläufig|Adjektiv","die|Artikel Erklärung|Nomen unvollständig|Adjektiv","der|Artikel Zusammenhang|Nomen unbelegt|Adjektiv","die|Artikel Aussage|Nomen widersprüchlich|Adjektiv","das|Artikel Verfahren|Nomen problematisch|Adjektiv","die|Artikel Einordnung|Nomen überzeugend|Adjektiv"];
+  for(const subject of hardSubjects)for(const pred of predicates)for(const outcome of outcomes){const s="Obwohl|Konjunktion "+subject+" zunächst|Adverb "+pred+"|Adjektiv erschien|Verb, blieb|Verb "+outcome+".";if(!seen.schwer.has(s)){seen.schwer.add(s);SETS.schwer.push(s);}}
+  for(const key of ["leicht","mittel","schwer"])if(SETS[key].length<300)throw new Error("Satzpool "+key+" kleiner als 300.");
+}
+expandPools();
+function taskInfo(){return BONUS_TASKS[round]||null;}
+function pickQueue(which,count){
+  BONUS_TASKS={};
+  if(which!=="leicht")return shuffled(SETS[which]).slice(0,count);
+  const bonusCount=Math.round(count*0.2);
+  const eligible=SETS.leicht.filter(s=>parse(s).some(w=>w.type==="Pronomen"));
+  const special=shuffled(eligible).slice(0,bonusCount),used=new Set(special);
+  const regular=shuffled(SETS.leicht.filter(s=>!used.has(s))).slice(0,count-bonusCount);
+  const triples=Math.max(1,Math.round(bonusCount/3));
+  const multipliers=shuffled(Array(bonusCount-triples).fill(2).concat(Array(triples).fill(3)));
+  queue=regular.concat(special);
+  for(let i=0;i<bonusCount;i++){const mult=multipliers[i];BONUS_TASKS[queue.length-bonusCount+i]={label:BONUS_LABELS[mult],multiplier:mult};}
+  return queue;
+}
 function parse(raw){return raw.trim().split(/\s+/).filter(Boolean).map(piece=>{if(piece.endsWith("|"))piece=piece.slice(0,-1);const match=piece.match(/^(.+)\|([^|.,!?;:]+)([.,!?;:]*)$/u);if(!match)throw new Error("Ungültige Aufgabenangabe: "+piece);return {text:match[1],type:match[2],punct:match[3]};});}
-function show(view){$("home").classList.toggle("hidden",view!=="home");$("lesson").classList.toggle("hidden",view!=="lesson");$("finish").classList.toggle("hidden",view!=="finish");window.scrollTo({top:0,behavior:"smooth"});}
-function start(which){level=which;round=0;queue=[...SETS[level]];answers=Array(parse(queue[0]).length).fill("");selected=-1;activeType="";checked=false;roundCheckedOnce=false;totalCorrect=0;firstTry=0;score=0;feedbackText="";feedbackKind="";$("levelName").textContent=TITLES[level];show("lesson");render();}
+function show(view){$("home").classList.toggle("hidden",view!=="home");$("lesson").classList.toggle("hidden",view!=="lesson");$("finish").classList.toggle("hidden",view!=="finish");if(view==="home"){selectedLevel="";selectedCount=0;$("levelGrid").classList.remove("hidden");$("taskPicker").classList.add("hidden");$("guide").classList.remove("hidden");$("startTraining").disabled=true;document.querySelectorAll(".task-option").forEach(b=>b.setAttribute("aria-pressed","false"));}window.scrollTo({top:0,behavior:"smooth"});}
+function openTaskPicker(which){selectedLevel=which;selectedCount=0;$("levelGrid").classList.add("hidden");$("guide").classList.add("hidden");$("taskPicker").classList.remove("hidden");$("taskPickerTitle").textContent="Wie viele Aufgaben möchtest du lösen? · "+TITLES[which];$("startTraining").disabled=true;document.querySelectorAll(".task-option").forEach(b=>b.setAttribute("aria-pressed","false"));$("taskPicker").scrollIntoView({behavior:"smooth",block:"center"});}
+function start(which,count){level=which;requestedCount=[10,20,30].includes(Number(count))?Number(count):10;round=0;queue=pickQueue(level,requestedCount);answers=Array(parse(queue[0]).length).fill("");selected=-1;activeType="";checked=false;roundCheckedOnce=false;totalCorrect=0;firstTry=0;score=0;feedbackText="";feedbackKind="";$("levelName").textContent=TITLES[level];show("lesson");render();}
 function render(){
   const words=parse(queue[round]);
   $("taskCount").textContent=`Aufgabe ${round+1} von ${queue.length}`;const bonus=taskInfo();$("bonusBadge").textContent=bonus?.label||"";$("bonusBadge").classList.toggle("hidden",!bonus);$("bonusBadge").classList.toggle("triple",bonus?.multiplier===3);$("scoreNow").textContent=score;
@@ -247,12 +307,15 @@ function check(){
 }
 function advance(){round+=1;if(round>=queue.length){$("finishMessage").textContent=`Du hast ${queue.length} Aufgaben auf der Stufe „${TITLES[level]}“ bearbeitet und ${totalCorrect} Wörter korrekt zugeordnet. ${firstTry===queue.length?"Jede Aufgabe war gleich beim ersten Prüfen richtig!":`Beim ersten Prüfen waren ${firstTry} Aufgaben schon vollständig richtig.`}`;$("finalScore").textContent=score;$("progressBar").style.width="100%";show("finish");return;}answers=Array(parse(queue[round]).length).fill("");selected=-1;activeType="";checked=false;roundCheckedOnce=false;feedbackText="";feedbackKind="";$("check").textContent="Antwort prüfen";render();$("sentence").scrollIntoView({behavior:"smooth",block:"center"});}
 
-document.querySelectorAll(".level-card").forEach(b=>b.addEventListener("click",()=>start(b.dataset.level)));
+document.querySelectorAll(".level-card").forEach(b=>b.addEventListener("click",()=>openTaskPicker(b.dataset.level)));
+document.querySelectorAll(".task-option").forEach(b=>b.addEventListener("click",()=>{selectedCount=Number(b.dataset.count);document.querySelectorAll(".task-option").forEach(o=>o.setAttribute("aria-pressed",String(o===b)));$("startTraining").disabled=false;}));
+$("startTraining").addEventListener("click",()=>{if(selectedLevel&&selectedCount)start(selectedLevel,selectedCount);});
+$("backToLevels").addEventListener("click",()=>show("home"));
 $("check").addEventListener("click",check);
 $("next").addEventListener("click",advance);
 $("quit").addEventListener("click",()=>show("home"));
 $("choose").addEventListener("click",()=>show("home"));
-$("repeat").addEventListener("click",()=>start(level));
+$("repeat").addEventListener("click",()=>start(level,requestedCount));
 if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("./sw.js").catch(()=>{});
 </script>
 </body>
