@@ -8,7 +8,7 @@ Silbenhelden ist eine kostenlose, iPad-optimierte Web-App zum Trainieren des Les
 
 - 150 vorbereitete Sätze in drei Schulstufen
 - Wortarten-Training mit mindestens 300 Aufgabenvarianten je Schwierigkeitsstufe und einer Auswahl von 10, 20 oder 30 Aufgaben
-- In der Grundschulstufe sind 20 % jeder Runde Pronomen-Sonderaufgaben mit doppelten oder dreifachen Punkten
+- In der Grundschulstufe kommen ausschließlich Artikel, Nomen, Verben, Adjektive und Pronomen vor; 20 % jeder Runde sind Pronomen-Sonderaufgaben mit doppelten oder dreifachen Punkten
 - 15 Lernpfade mit jeweils zehn Aufgaben
 - adaptiver Trainer, der die Schwierigkeit an den Lernstand anpasst
 - Wiederholsystem mit Intervallen von 1, 3, 7, 14, 30 und 60 Tagen
