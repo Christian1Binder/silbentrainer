@@ -183,19 +183,19 @@ const SETS = {
   leicht: [
     "Der|Artikel laute|Adjektiv Hund|Nomen bellt|Verb.|",
     "Die|Artikel kleine|Adjektiv Katze|Nomen schläft|Verb.|",
-    "Ein|Artikel Vogel|Nomen fliegt|Verb heute|Adverb.|",
+    "Ein|Artikel Vogel|Nomen fliegt|Verb.|",
     "Das|Artikel Kind|Nomen malt|Verb ein|Artikel buntes|Adjektiv Bild|Nomen.|",
     "Mia|Nomen lacht|Verb.|",
     "Der|Artikel Ball|Nomen rollt|Verb.|",
     "Eine|Artikel duftende|Adjektiv Blume|Nomen blüht|Verb.|",
-    "Der|Artikel alte|Adjektiv Baum|Nomen steht|Verb dort|Adverb.|",
+    "Der|Artikel alte|Adjektiv Baum|Nomen steht|Verb.|",
     "Tom|Nomen liest|Verb ein|Artikel spannendes|Adjektiv Buch|Nomen.|",
     "Die|Artikel Sonne|Nomen scheint|Verb warm|Adjektiv.|",
-    "Ein|Artikel kleiner|Adjektiv Frosch|Nomen hüpft|Verb heute|Adverb.|",
+    "Ein|Artikel kleiner|Adjektiv Frosch|Nomen hüpft|Verb.|",
     "Meine|Pronomen Schwester|Nomen singt|Verb.|",
-    "Ich|Pronomen sehe|Verb ihn|Pronomen heute|Adverb.",
+    "Ich|Pronomen sehe|Verb ihn|Pronomen.",
     "Sie|Pronomen schenkt|Verb dem|Artikel kleinen|Adjektiv Hund|Nomen seinen|Pronomen alten|Adjektiv Ball|Nomen.",
-    "Wenn|Konjunktion du|Pronomen dich|Pronomen beeilst|Verb, erreichst|Verb du|Pronomen noch|Adverb den|Artikel Bus|Nomen."
+    "Du|Pronomen findest|Verb deinen|Pronomen Ball|Nomen."
   ],
   mittel: [
     "Heute|Adverb fährt|Verb meine|Pronomen Freundin|Nomen mit|Präposition dem|Artikel Bus|Nomen in|Präposition die|Artikel Schule|Nomen.|",
@@ -240,14 +240,13 @@ function tagged(word,type){return word+"|"+type;}
 function shuffled(items){const copy=items.slice();for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}return copy;}
 function expandPools(){
   const seen={leicht:new Set(SETS.leicht),mittel:new Set(SETS.mittel),schwer:new Set(SETS.schwer)};
-  const subjects=["Der|Artikel kleine|Adjektiv Hund|Nomen","Die|Artikel flinke|Adjektiv Katze|Nomen","Das|Artikel fröhliche|Adjektiv Kind|Nomen","Der|Artikel bunte|Adjektiv Vogel|Nomen","Das|Artikel junge|Adjektiv Pferd|Nomen","Der|Artikel schnelle|Adjektiv Hase|Nomen","Die|Artikel nette|Adjektiv Nachbarin|Nomen","Der|Artikel geduldige|Adjektiv Lehrer|Nomen","Die|Artikel kluge|Adjektiv Schülerin|Nomen","Der|Artikel kleine|Adjektiv Bruder|Nomen"];
-  const verbs=[["bellt","rennt","schläft","wartet","spielt","läuft","springt","sitzt","steht","hüpft"],["miaut","rennt","schläft","wartet","spielt","läuft","springt","sitzt","steht","hüpft"],["lacht","rennt","schläft","wartet","spielt","läuft","springt","sitzt","lernt","hüpft"],["fliegt","singt","landet","wartet","spielt","läuft","springt","sitzt","steht","hüpft"],["galoppiert","rennt","schläft","wartet","spielt","läuft","springt","steht","frisst","grast"],["hoppelt","rennt","schläft","wartet","spielt","läuft","springt","sitzt","frisst","grast"],["arbeitet","rennt","wartet","spielt","läuft","sitzt","steht","lernt","lacht","tanzt"],["arbeitet","rennt","wartet","spielt","läuft","sitzt","steht","lernt","lacht","singt"],["lernt","rennt","wartet","spielt","läuft","sitzt","steht","liest","lacht","tanzt"],["lernt","rennt","wartet","spielt","läuft","sitzt","steht","liest","lacht","singt"]];
-  const adverbs=["heute|Adverb","oft|Adverb","morgens|Adverb"];
-  for(let i=0;i<subjects.length;i++)for(const verb of verbs[i])for(const adv of adverbs){const s=subjects[i]+" "+tagged(verb,"Verb")+" "+adv+".";if(!seen.leicht.has(s)){seen.leicht.add(s);SETS.leicht.push(s);}}
-  const pronouns=["Ich|Pronomen spiele|Verb","Du|Pronomen spielst|Verb","Er|Pronomen spielt|Verb","Sie|Pronomen spielt|Verb","Wir|Pronomen spielen|Verb","Ihr|Pronomen spielt|Verb"];
-  const objects=["dem|Artikel Ball|Nomen","der|Artikel Puppe|Nomen","dem|Artikel Hund|Nomen","der|Artikel Katze|Nomen","den|Artikel Bausteinen|Nomen","dem|Artikel Drachen|Nomen","meiner|Pronomen Freundin|Nomen","den|Artikel Karten|Nomen","dem|Artikel Seil|Nomen","dem|Artikel Teddy|Nomen"];
-  const playAdverbs=["heute|Adverb","gern|Adverb","draußen|Adverb","nachmittags|Adverb","oft|Adverb","zusammen|Adverb"];
-  for(const p of pronouns)for(const adv of playAdverbs)for(const obj of objects){const s=p+" "+adv+" mit|Präposition "+obj+".";if(!seen.leicht.has(s)){seen.leicht.add(s);SETS.leicht.push(s);}}
+  const easySubjects=["Mia","Tom","Lena","Ben","Emma","Paul","Lea","Omar","Nina","Max"];
+  const easyVerbs=["sieht","findet","holt","nimmt","sucht","trägt","mag","kauft","hat","kennt"];
+  const easyObjects=["den|Artikel roten|Adjektiv Ball|Nomen","das|Artikel spannende|Adjektiv Buch|Nomen","die|Artikel weiche|Adjektiv Puppe|Nomen","den|Artikel braunen|Adjektiv Teddy|Nomen"];
+  for(const name of easySubjects)for(const verb of easyVerbs)for(const object of easyObjects){const subject=tagged(name,"Nomen");const s=subject+" "+tagged(verb,"Verb")+" "+object+".";if(!seen.leicht.has(s)){seen.leicht.add(s);SETS.leicht.push(s);}}
+  const pronounPairs=["Ich|Pronomen sehe|Verb","Du|Pronomen siehst|Verb","Er|Pronomen sieht|Verb","Sie|Pronomen sieht|Verb","Wir|Pronomen sehen|Verb","Ihr|Pronomen seht|Verb"];
+  const pronounObjects=["ihn|Pronomen","sie|Pronomen","es|Pronomen","mich|Pronomen","dich|Pronomen","uns|Pronomen","euch|Pronomen"];
+  for(const pair of pronounPairs)for(const object of pronounObjects){const s=pair+" "+object+".";if(!seen.leicht.has(s)){seen.leicht.add(s);SETS.leicht.push(s);}}
   const cores=[
     "Ich|Pronomen bearbeite|Verb eine|Artikel schwierige|Adjektiv Aufgabe|Nomen","Du|Pronomen löst|Verb die|Artikel knifflige|Adjektiv Frage|Nomen","Er|Pronomen beantwortet|Verb eine|Artikel wichtige|Adjektiv Frage|Nomen","Sie|Pronomen schreibt|Verb eine|Artikel ausführliche|Adjektiv Nachricht|Nomen","Wir|Pronomen vergleichen|Verb die|Artikel verschiedenen|Adjektiv Ergebnisse|Nomen","Ihr|Pronomen lest|Verb den|Artikel interessanten|Adjektiv Text|Nomen","Die|Artikel Gruppe|Nomen plant|Verb eine|Artikel gemeinsame|Adjektiv Präsentation|Nomen","Lena|Nomen und|Konjunktion Amir|Nomen suchen|Verb den|Artikel fehlenden|Adjektiv Schlüssel|Nomen","Die|Artikel Lehrerin|Nomen erklärt|Verb eine|Artikel schwierige|Adjektiv Regel|Nomen","Mehrere|Zahlwort Schüler|Nomen untersuchen|Verb den|Artikel spannenden|Adjektiv Versuch|Nomen","Die|Artikel Forschenden|Nomen prüfen|Verb die|Artikel gesammelten|Adjektiv Daten|Nomen","Ich|Pronomen ordne|Verb die|Artikel wichtigen|Adjektiv Hinweise|Nomen","Du|Pronomen findest|Verb den|Artikel entscheidenden|Adjektiv Fehler|Nomen","Er|Pronomen vergleicht|Verb beide|Pronomen Ergebnisse|Nomen","Sie|Pronomen ordnet|Verb die|Artikel einzelnen|Adjektiv Wörter|Nomen","Wir|Pronomen besprechen|Verb den|Artikel neuen|Adjektiv Plan|Nomen","Ihr|Pronomen sammelt|Verb wichtige|Adjektiv Informationen|Nomen","Die|Artikel Kinder|Nomen üben|Verb das|Artikel schwierige|Adjektiv Gedicht|Nomen","Paul|Nomen und|Konjunktion Lea|Nomen entwerfen|Verb einen|Artikel eigenen|Adjektiv Fragebogen|Nomen","Unsere|Pronomen Klasse|Nomen organisiert|Verb den|Artikel nächsten|Adjektiv Ausflug|Nomen"
   ];
@@ -257,6 +256,8 @@ function expandPools(){
   const predicates=["plausibel","schlüssig","überzeugend","eindeutig","belastbar","nachvollziehbar","vollständig","differenziert","systematisch","sorgfältig"];
   const outcomes=["das|Artikel Ergebnis|Nomen umstritten|Adjektiv","die|Artikel Schlussfolgerung|Nomen fragwürdig|Adjektiv","die|Artikel These|Nomen ungeklärt|Adjektiv","der|Artikel Befund|Nomen unklar|Adjektiv","das|Artikel Modell|Nomen vorläufig|Adjektiv","die|Artikel Erklärung|Nomen unvollständig|Adjektiv","der|Artikel Zusammenhang|Nomen unbelegt|Adjektiv","die|Artikel Aussage|Nomen widersprüchlich|Adjektiv","das|Artikel Verfahren|Nomen problematisch|Adjektiv","die|Artikel Einordnung|Nomen überzeugend|Adjektiv"];
   for(const subject of hardSubjects)for(const pred of predicates)for(const outcome of outcomes){const s="Obwohl|Konjunktion "+subject+" zunächst|Adverb "+pred+"|Adjektiv erschien|Verb, blieb|Verb "+outcome+".";if(!seen.schwer.has(s)){seen.schwer.add(s);SETS.schwer.push(s);}}
+  const easyAllowed=new Set(["Artikel","Nomen","Verb","Adjektiv","Pronomen"]);
+  for(const sentence of SETS.leicht){const invalid=parse(sentence).find(word=>!easyAllowed.has(word.type));if(invalid)throw new Error("Nicht erlaubte Wortart in Grundschulaufgabe: "+invalid.type);}
   for(const key of ["leicht","mittel","schwer"])if(SETS[key].length<300)throw new Error("Satzpool "+key+" kleiner als 300.");
 }
 expandPools();
