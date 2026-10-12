@@ -1,4 +1,4 @@
-const CACHE_NAME = "silbenhelden-v9-2026-10";
+const CACHE_NAME = "silbenhelden-v10-2026-10";
 const CORE_ASSETS = [
   "./",
   "./index.html",
