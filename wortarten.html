@@ -177,6 +177,7 @@
 
 <script>
 const TYPES = ["Nomen","Verb","Adjektiv","Artikel","Pronomen","Präposition","Adverb","Konjunktion","Zahlwort","Ausrufewort"];
+const EASY_TYPES = ["Artikel","Nomen","Verb","Adjektiv","Pronomen"];
 const TYPE_HINTS = {Nomen:"Ding / Name",Verb:"Tun / Sein",Adjektiv:"Wie ist es?",Artikel:"Begleiter",Pronomen:"Fürwort",Präposition:"Verhältniswort",Adverb:"Umstandswort",Konjunktion:"Bindewort",Zahlwort:"Zahl / Menge",Ausrufewort:"Ausruf"};
 // Jedes Wort ist als "Wort|Wortart" notiert. Die Lösung wird erst beim Prüfen sichtbar.
 const SETS = {
@@ -256,7 +257,7 @@ function expandPools(){
   const predicates=["plausibel","schlüssig","überzeugend","eindeutig","belastbar","nachvollziehbar","vollständig","differenziert","systematisch","sorgfältig"];
   const outcomes=["das|Artikel Ergebnis|Nomen umstritten|Adjektiv","die|Artikel Schlussfolgerung|Nomen fragwürdig|Adjektiv","die|Artikel These|Nomen ungeklärt|Adjektiv","der|Artikel Befund|Nomen unklar|Adjektiv","das|Artikel Modell|Nomen vorläufig|Adjektiv","die|Artikel Erklärung|Nomen unvollständig|Adjektiv","der|Artikel Zusammenhang|Nomen unbelegt|Adjektiv","die|Artikel Aussage|Nomen widersprüchlich|Adjektiv","das|Artikel Verfahren|Nomen problematisch|Adjektiv","die|Artikel Einordnung|Nomen überzeugend|Adjektiv"];
   for(const subject of hardSubjects)for(const pred of predicates)for(const outcome of outcomes){const s="Obwohl|Konjunktion "+subject+" zunächst|Adverb "+pred+"|Adjektiv erschien|Verb, blieb|Verb "+outcome+".";if(!seen.schwer.has(s)){seen.schwer.add(s);SETS.schwer.push(s);}}
-  const easyAllowed=new Set(["Artikel","Nomen","Verb","Adjektiv","Pronomen"]);
+  const easyAllowed=new Set(EASY_TYPES);
   for(const sentence of SETS.leicht){const invalid=parse(sentence).find(word=>!easyAllowed.has(word.type));if(invalid)throw new Error("Nicht erlaubte Wortart in Grundschulaufgabe: "+invalid.type);}
   for(const key of ["leicht","mittel","schwer"])if(SETS[key].length<300)throw new Error("Satzpool "+key+" kleiner als 300.");
 }
@@ -293,7 +294,8 @@ function render(){
     area.append(b);if(w.punct){const p=document.createElement("span");p.textContent=w.punct;area.append(p);}
   });
   const palette=$("wordTypes");palette.replaceChildren();
-  TYPES.forEach(type=>{const b=document.createElement("button");b.className="type-button";b.type="button";b.dataset.type=type;b.classList.toggle("active",type===activeType);b.setAttribute("aria-pressed",String(type===activeType));b.setAttribute("aria-label",type);b.innerHTML=`${type}<small>${TYPE_HINTS[type]}</small>`;b.addEventListener("click",()=>assign(type));palette.append(b);});
+  const visibleTypes=level==="leicht"?EASY_TYPES:TYPES;
+  visibleTypes.forEach(type=>{const b=document.createElement("button");b.className="type-button";b.type="button";b.dataset.type=type;b.classList.toggle("active",type===activeType);b.setAttribute("aria-pressed",String(type===activeType));b.setAttribute("aria-label",type);b.innerHTML=`${type}<small>${TYPE_HINTS[type]}</small>`;b.addEventListener("click",()=>assign(type));palette.append(b);});
   $("selectedNote").textContent=selected>=0?`Ausgewählt: „${words[selected].text}“ · jetzt die Wortart antippen.`:activeType?`Aktive Wortart: ${activeType} · tippe passende Wörter an. Erneut antippen, um abzuwählen.`:"Wähle eine Wortart und tippe passende Wörter an – oder tippe zuerst ein Wort an.";
   $("check").classList.remove("hidden");$("check").disabled=answers.some(a=>!a);$("check").textContent=checked?"Erneut prüfen":"Antwort prüfen";
   const allCorrect=checked&&words.every((w,i)=>answers[i]===w.type);$("check").classList.toggle("hidden",allCorrect);$("next").classList.toggle("hidden",!allCorrect);
